@@ -15,6 +15,7 @@ in a Python list.
 
 # minimo= -5.5 V
 
+
 class CallbackTask(Task):
     def __init__(self):
         Task.__init__(self)
@@ -29,7 +30,8 @@ class CallbackTask(Task):
 
     def EveryNCallback(self):
         read = PyDAQmx.int32()
-        self.ReadAnalogF64(self.nSamples, 0, PyDAQmx.DAQmx_Val_GroupByScanNumber, self.data, self.nSamples, PyDAQmx.byref(read), None)
+        self.ReadAnalogF64(self.nSamples, 0, PyDAQmx.DAQmx_Val_GroupByScanNumber, self.data, self.nSamples,
+                           PyDAQmx.byref(read), None)
         self.a.extend(self.data.tolist())
         print self.data
         return 0  # The function should return an integer
