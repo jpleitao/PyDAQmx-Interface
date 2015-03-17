@@ -2,21 +2,66 @@
 __author__ = 'Joaquim Leitão'
 
 import PyDAQmx
+import numpy
 
-#  Define constants of the library
+#  Constants definition
 DAQMX_MIN_ACTUATION_V = 0.0
 DAQMX_MAX_ACTUATION_V = 5.0
+DAQMX_MIN_READER_V = -10.0
+DAQMX_MAX_READER_V = 10.0
+VAL_VOLTS = PyDAQmx.DAQmx_Val_Volts
+GROUP_BY_CHANNEL = PyDAQmx.DAQmx_Val_GroupByChannel
+GROUP_BY_SCAN_NUMBER = PyDAQmx.DAQmx_Val_GroupByScanNumber
+VAL_RISING = PyDAQmx.DaQmx_Val_Rising
+VAL_CONT_SAMPS = PyDAQmx.DAQmx_Val_ContSamps
+VAL_RSE = PyDAQmx.DAQmx_Val_RSE
+VAL_ACQUIRED_INTO_BUFFER = PyDAQmx.DAQmx_Val_Acquired_Into_Buffer
 
 
 class Actuator(PyDAQmx.Task):
     def __init__(self, physical_channel="Dev1/ao0", channel_name=""):
+        """Class Constructor"""
         PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
         self.CreateAOVoltageChan(physical_channel, channel_name, DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
-                                 PyDAQmx.DAQmx_Val_Volts, None)
+                                 VAL_VOLTS, None)  # Create Voltage Channel
 
     def start_task(self):
+        """Starts the task, but does not start its execution"""
         self.StartTask()
 
     def execute_task(self, num_samps_channel, message, auto_start=1, timeout=0):
-        self.WriteAnalogF64(num_samps_channel, auto_start, timeout, PyDAQmx.DAQmx_Val_GroupByChannel, message, None,
+        """Executes the given task, starting its actuation"""
+        self.WriteAnalogF64(num_samps_channel, auto_start, timeout, GROUP_BY_CHANNEL, message, None,
                             None)
+
+
+class Reader(PyDAQmx.Task):
+    def __init__(self, physical_channel="Dev1/ai1", channel_name="", fs=100.0, samples=1):
+        """Class Constructor"""
+        PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
+        self.fs = fs  # Samples per second
+        self.n_samples = samples  # Number of Samples to get at every callback
+        self.data = numpy.zeros(self.n_samples)  # Store the data read at every callback
+        self.CreateAIVoltageChan(physical_channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+                                 VAL_VOLTS, None)  # Create Voltage Channel
+        # Sets the source of the Sample Clock to self.fs with a rate equal to "VAL_RISING" and the number of samples to
+        # acquire or generate set to self.n_samples
+        self.CfgSampClkTiming("", self.fs, VAL_RISING, VAL_CONT_SAMPS, self.n_samples)
+        # Register the callback method "EveryNCallback" (default) to receive an event when self.n_samples samples have
+        # been written from the device to the buffer
+        self.AutoRegisterEveryNSamplesEvent(VAL_ACQUIRED_INTO_BUFFER, self.nSamples, 0)
+        self.AutoRegisterDoneEvent(0)
+
+    def EveryNCallback(self, timeout=0):
+        """Default method called when a specified number of samples have been written from the device to the buffer"""
+        read = PyDAQmx.int32()
+        # Reads self.n_samples floating-point samples to the array "self.data" of "self.n_samples" samples
+        self.ReadAnalogF64(self.n_samples, timeout, GROUP_BY_SCAN_NUMBER, self.data, self.n_samples,
+                           PyDAQmx.byref(read), None)
+        print self.data
+        return 0  # The function should return an integer
+
+    def DoneCallback(self, status):
+        """Called when the task ends"""
+        print "Status", status.value
+        return 0  # The function should return an integer
