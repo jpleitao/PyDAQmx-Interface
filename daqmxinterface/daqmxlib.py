@@ -12,7 +12,7 @@ DAQMX_MAX_READER_V = 10.0
 VAL_VOLTS = PyDAQmx.DAQmx_Val_Volts
 GROUP_BY_CHANNEL = PyDAQmx.DAQmx_Val_GroupByChannel
 GROUP_BY_SCAN_NUMBER = PyDAQmx.DAQmx_Val_GroupByScanNumber
-VAL_RISING = PyDAQmx.DaQmx_Val_Rising
+VAL_RISING = PyDAQmx.DAQmx_Val_Rising
 VAL_CONT_SAMPS = PyDAQmx.DAQmx_Val_ContSamps
 VAL_RSE = PyDAQmx.DAQmx_Val_RSE
 VAL_ACQUIRED_INTO_BUFFER = PyDAQmx.DAQmx_Val_Acquired_Into_Buffer
@@ -28,6 +28,14 @@ class Actuator(PyDAQmx.Task):
     def start_task(self):
         """Starts the task, but does not start its execution"""
         self.StartTask()
+
+    def stop_task(self):
+        """Stops the task's execution"""
+        self.StopTask()
+
+    def clear_task(self):
+        """Clears the task"""
+        self.ClearTask()
 
     def execute_task(self, num_samps_channel, message, auto_start=1, timeout=0):
         """Executes the given task, starting its actuation"""
@@ -49,8 +57,20 @@ class Reader(PyDAQmx.Task):
         self.CfgSampClkTiming("", self.fs, VAL_RISING, VAL_CONT_SAMPS, self.n_samples)
         # Register the callback method "EveryNCallback" (default) to receive an event when self.n_samples samples have
         # been written from the device to the buffer
-        self.AutoRegisterEveryNSamplesEvent(VAL_ACQUIRED_INTO_BUFFER, self.nSamples, 0)
+        self.AutoRegisterEveryNSamplesEvent(VAL_ACQUIRED_INTO_BUFFER, self.n_samples, 0)
         self.AutoRegisterDoneEvent(0)
+
+    def start_task(self):
+        """Starts the task, but does not start its execution"""
+        self.StartTask()
+
+    def stop_task(self):
+        """Stops the task's execution"""
+        self.StopTask()
+
+    def clear_task(self):
+        """Clears the task"""
+        self.ClearTask()
 
     def EveryNCallback(self, timeout=0):
         """Default method called when a specified number of samples have been written from the device to the buffer"""

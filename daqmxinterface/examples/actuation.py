@@ -1,3 +1,4 @@
+# coding: utf-8
 __author__ = 'Joaquim Leitão'
 
 import PyDAQmx
@@ -26,5 +27,6 @@ print data
 for banana in data:
     data2 = numpy.array(banana)
     analog_output.WriteAnalogF64(1, 1, 0, PyDAQmx.DAQmx_Val_GroupByChannel, data2, None, None)
-    time.sleep(1)
+    time.sleep(3)
+    print("Going to run")
 
