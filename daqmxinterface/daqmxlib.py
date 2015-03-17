@@ -43,15 +43,31 @@ class Actuator(PyDAQmx.Task):
                             None)
 
 
-class Reader(PyDAQmx.Task):
+#  class Reader(PyDAQmx.Task):
+class Reader():
     def __init__(self, physical_channel="Dev1/ai1", channel_name="", fs=100.0, samples=1):
         """Class Constructor"""
-        PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
+        #  PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
         self.fs = fs  # Samples per second
         self.n_samples = samples  # Number of Samples to get at every callback
         self.data = numpy.zeros(self.n_samples)  # Store the data read at every callback
-        self.CreateAIVoltageChan(physical_channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
-                                 VAL_VOLTS, None)  # Create Voltage Channel
+
+        
+        if type(physicalChannel) == type(""): # String type
+            self.physicalChannel = [physicalChannel]
+        else:
+            self.physicalChannel = physicalChannel
+        
+        taskHandles = dict([(channel,PyDAQmx.TaskHandle(0)) for channel in self.physicalChannel])
+        
+        for channel in self.physical_channel:
+            PyDAQmx.DAQmxCreateTask("",byref(taskHandles[channel]))
+            PyDAQmx.DAQmxCreateAIVoltageChan(taskHandles[channel], channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+                                     VAL_VOLTS, None)  # Create Voltage Channel
+
+        self.task_handles = taskHandles
+
+        
         # Sets the source of the Sample Clock to self.fs with a rate equal to "VAL_RISING" and the number of samples to
         # acquire or generate set to self.n_samples
         self.CfgSampClkTiming("", self.fs, VAL_RISING, VAL_CONT_SAMPS, self.n_samples)
@@ -60,24 +76,29 @@ class Reader(PyDAQmx.Task):
         self.AutoRegisterEveryNSamplesEvent(VAL_ACQUIRED_INTO_BUFFER, self.n_samples, 0)
         self.AutoRegisterDoneEvent(0)
 
-    def start_task(self):
+    def start_tasks(self):
         """Starts the task, but does not start its execution"""
+        #  Percorrer todas as tasks e fazer start task
         self.StartTask()
 
-    def stop_task(self):
+    def stop_tasks(self):
         """Stops the task's execution"""
+        #  Percorrer todas as tasks e fazer stop task
         self.StopTask()
 
-    def clear_task(self):
+    def clear_tasks(self):
         """Clears the task"""
+        #  Percorrer todas as tasks e fazer clear task
         self.ClearTask()
 
     def EveryNCallback(self, timeout=0):
         """Default method called when a specified number of samples have been written from the device to the buffer"""
         read = PyDAQmx.int32()
-        # Reads self.n_samples floating-point samples to the array "self.data" of "self.n_samples" samples
-        self.ReadAnalogF64(self.n_samples, timeout, GROUP_BY_SCAN_NUMBER, self.data, self.n_samples,
-                           PyDAQmx.byref(read), None)
+
+        for current_task in self.task_handles:
+            # Reads self.n_samples floating-point samples to the array "self.data" of "self.n_samples" samples
+            PyDAQmx.DAQmxReadAnalogF64(current_task, self.n_samples, timeout, GROUP_BY_SCAN_NUMBER, self.data, self.n_samples,
+                                       PyDAQmx.byref(read), None)
         print self.data
         return 0  # The function should return an integer
 
