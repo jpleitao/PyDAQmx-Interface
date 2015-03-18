@@ -12,17 +12,18 @@ In order to successfully run the contents of this package the following requirem
 ## Installation 
 ### Windows - PyDAQmx
 
-1. Manual
-    1. Download the [PyDAQmx package](https://pypi.python.org/packages/source/P/PyDAQmx/PyDAQmx-1.3.1.tar.gz)
-    2. Unpack it 
-    3. ```python setup.py install```
-2. Via pip
-    1. ```pip install PyDAQmx```
+Manual mode:
+
+1. Download the [PyDAQmx package](https://pypi.python.org/packages/source/P/PyDAQmx/PyDAQmx-1.3.1.tar.gz)
+2. Unpack it 
+3. ```python setup.py install```
+
+Or via pip:
+
+1. ```pip install PyDAQmx```
   
 ### Windows - NIDAQmx driver
-2. Install the NIDAQmx driver
-    1. Download the [NIDAQmx driver](http://ftp.ni.com/support/softlib/multifunction_daq/nidaqmx/9.8/NIDAQ980f3_downloader.exe)
-    2. Install it 
+1. Download and install the [NIDAQmx driver](http://ftp.ni.com/support/softlib/multifunction_daq/nidaqmx/9.8/NIDAQ980f3_downloader.exe)
 
 
 ### Linux 
