@@ -44,7 +44,7 @@ class Actuator(PyDAQmx.Task):
 
 
 class Reader(PyDAQmx.Task):
-    def __init__(self, physical_channel="Dev1/ai1", channel_name="", fs=100.0, samples=1):
+    def __init__(self, physical_channel="Dev1/ai1", channel_name="", fs=1.0, samples=1):
         """Class Constructor"""
         PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
         self.fs = fs  # Samples per second
