@@ -40,7 +40,7 @@ class MultiChannelAnalogInput():
         for name in self.physicalChannel:
             task = PyDAQmx.Task()
             tasks.append(task)
-            PyDAQmx.DAQmxCreateTask("", PyDAQmx.byref(task_handles[name]))
+            # PyDAQmx.DAQmxCreateTask("", PyDAQmx.byref(task_handles[name]))
             task.CreateAIVoltageChan(name, "", PyDAQmx.DAQmx_Val_RSE,
                                      self.limit[name][0], self.limit[name][1],
                                      PyDAQmx.DAQmx_Val_Volts, None)  # Can replace limits with my own limits
