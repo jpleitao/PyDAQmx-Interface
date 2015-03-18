@@ -66,8 +66,11 @@ class MultiChannelAnalogInput():
 
 
 if __name__ == '__main__':
+    import time
+
     multipleAI = MultiChannelAnalogInput(["Dev1/ai2", "Dev1/ai1"])
     multipleAI.configure()
-    print multipleAI.readAll()
-    print multipleAI.readAll()
-    print multipleAI.readAll()
+
+    while True:
+        print multipleAI.readAll()
+        time.sleep(1)
