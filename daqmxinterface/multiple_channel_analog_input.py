@@ -35,7 +35,7 @@ class MultiChannelAnalogInput():
 
     def configure(self):
         # Create one task handle per Channel
-        task_handles = dict([(name, PyDAQmx.TaskHandle(0)) for name in self.physicalChannel])
+        # task_handles = dict([(name, PyDAQmx.TaskHandle(0)) for name in self.physicalChannel])
         tasks = []
         for name in self.physicalChannel:
             task = PyDAQmx.Task()
@@ -44,7 +44,7 @@ class MultiChannelAnalogInput():
             task.CreateAIVoltageChan(name, "", PyDAQmx.DAQmx_Val_RSE,
                                      self.limit[name][0], self.limit[name][1],
                                      PyDAQmx.DAQmx_Val_Volts, None)  # Can replace limits with my own limits
-        self.task_handles = task_handles
+        # self.task_handles = task_handles
         self.tasks = dict([(self.physicalChannel[i], tasks[i]) for i in range(len(tasks))])
 
     def readAll(self):
@@ -53,24 +53,24 @@ class MultiChannelAnalogInput():
     def read(self, name=None):
         if name is None:
             name = self.physicalChannel[0]
-        task_handle = self.task_handles[name]
+        # task_handle = self.task_handles[name]
         task_handle = self.tasks[name]
-        PyDAQmx.Task.StartTask(task_handle)
+        # PyDAQmx.Task.StartTask(task_handle)
         data = numpy.zeros((1,), dtype=numpy.float64)
         # data = AI_data_type()
         read = PyDAQmx.int32()
         PyDAQmx.Task.ReadAnalogF64(task_handle, 1, 10.0, PyDAQmx.DAQmx_Val_GroupByChannel, data, 1,
                                    PyDAQmx.byref(read), None)
-        PyDAQmx.Task.StopTask(task_handle)
-        return data[0]
+        # PyDAQmx.Task.StopTask(task_handle)
+        return data
 
 
 if __name__ == '__main__':
     import time
 
-    multipleAI = MultiChannelAnalogInput(["Dev1/ai2", "Dev1/ai1"])
+    multipleAI = MultiChannelAnalogInput(["Dev1/ai1", "Dev1/ai2"])
     multipleAI.configure()
 
     while True:
-        print multipleAI.readAll()
+        print multipleAI.read()
         time.sleep(1)

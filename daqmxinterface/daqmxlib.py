@@ -49,41 +49,60 @@ class Actuator(PyDAQmx.Task):
 
 
 class Reader():
-    def __init__(self, physical_channel="[Dev1/ai1]", channel_name="", fs=1.0, samples=1):
-        """Class Constructor"""
+    """
+    Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
+    """
+    def __init__(self, physical_channels="[Dev1/ai1]", channel_names="", samples=1):
+        """
+        Class Constructor
+        :param physical_channels: A list of physicial channels used to acquire the data
+        :param channel_names: The names of the channels - MUST HAVE THE SAME LEN AS physical_channels
+        :param samples: The number of samples to collect
+        """
         # Get the set of physical channels from which we are going to extract the data
-        if type(physical_channel) == type(""):
-            self.physical_channel = [physical_channel]
+        if type(physical_channels) == type(""):
+            self.physical_channels = [physical_channels]
         else:
-            self.physical_channel = physical_channel
-        self.physical_channel = list(set(self.physical_channel))  # Remove duplicates
+            self.physical_channels = physical_channels
+        # Do the same for the names of the channels
+        if type(channel_names) == type(""):
+            self.channel_names = [channel_names]
+        else:
+            self.channel_names = channel_names
 
-        self.fs = fs  # Samples per second
+        self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
+
         self.n_samples = samples  # Number of Samples to get at every callback
         self.data = numpy.zeros(self.n_samples)  # Store the data read at every callback
 
         # Create the tasks, one to read in each channel (But first create the task handles)
-        # self.task_handles = dict([(channel, PyDAQmx.TaskHandle(0)) for channel in self.physical_channel])
+        self.task_handles = dict([(channel, PyDAQmx.TaskHandle(0)) for channel in self.physical_channels])
         tasks = []
-        for channel in self.physical_channel:
+        for i in range(len(self.physical_channels)):
+            channel = self.physical_channels[i]
+            channel_name = self.channel_names[i]
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS, None)
+            task.CreateAIVoltageChan(channel, channel_names, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS, None)
         # Save all the tasks
-        self.tasks = dict([(self.physical_channel[i], tasks[i]) for i in range(len(tasks))])
+        self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
 
-
-    def readAll(self):
-    	"""Reads data from all the active physical channels
-    	   Returns a dictionary with the data read from all the active physical channels"""
-        return dict([(name, self.read(name)) for name in self.physical_channel])
+    def read_all(self):
+        """
+        Reads data from all the active physical channels
+        :return: Returns a dictionary with the data read from all the active physical channels
+        """
+        return dict([(name, self.read(name)) for name in self.physical_channels])
 
     def read(self, name=None):
-    	"""Reads data from a given physical channel
-    	   Returns an array with the data read"""
+        """
+        Reads data from a given physical channel
+        :param name: The name of the channel from which we are going to read the data
+        :return: Returns an array with the data read
+        """
         if name is None:
-            name = self.physical_channel[0]
+            name = self.physical_channels[0]
 
         # Get task handle        
         task_handle = self.tasks[name]
@@ -96,16 +115,36 @@ class Reader():
         PyDAQmx.Task.ReadAnalogF64(task_handle, 1, 10.0, GROUP_BY_CHANNEL, data, 1, PyDAQmx.byref(read), None)
         return data
 
-    def start_task(self):
-        """Starts the task, but does not start its execution"""
-        self.StartTask()
+    def start_all_tasks(self):
+        """
+        Starts all the created tasks
+        :return: This method does not return any value
+        """
+        for task in self.tasks.keys():
+            self.tasks[task].StartTask()
 
-    def stop_task(self):
-        """Stops the task's execution and clears it"""
-        self.StopTask()
-        self.ClearTask()
+    def start_task(self, name):
+        """
+        Starts the task identified by the given name
+        :param name: The name of the task we want to start
+        :return: This method does not return any value
+        """
+        task = self.tasks[name]
+        task.StartTask()
 
-    def DoneCallback(self, status):
-        """Called when the task ends"""
-        print "Status", status.value
-        return 0  # The function should return an integer
+    def stop_all_tasks(self):
+        """
+        Stops all the created tasks
+        :return: This method does not return any value
+        """
+        for task in self.tasks.keys():
+            self.tasks[task].StopTask()
+
+    def stop_task(self, name):
+        """
+        Stops the task identified by the given name
+        :param name: The name of the task we want to start
+        :return: This method does not return any value
+        """
+        task = self.tasks[name]
+        task.StopTask()
