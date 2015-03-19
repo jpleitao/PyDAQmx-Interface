@@ -153,8 +153,12 @@ class Reader():
         # data = AI_data_type()
         read = PyDAQmx.int32()
 
+        PyDAQmx.Task.StartTask(task_handle)
+
         # Read the data and return it!
         PyDAQmx.Task.ReadAnalogF64(task_handle, 1, 10.0, GROUP_BY_CHANNEL, data, 1, PyDAQmx.byref(read), None)
+
+        PyDAQmx.Task.StopTask(task_handle)
         return data
 
     def start_all_tasks(self):
