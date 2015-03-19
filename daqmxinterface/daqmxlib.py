@@ -55,7 +55,7 @@ class Reader():
     """
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
-    def __init__(self, physical_channels=["Dev1/ai1"], channel_names=["ai1"], samples=1):
+    def __init__(self, physical_channels=["Dev1/ai1"], samples=1):
         """
         Class Constructor
         :param physical_channels: A list of physicial channels used to acquire the data
@@ -66,7 +66,6 @@ class Reader():
         # the channels
         self.physical_channels = self.__parse(physical_channels)
         self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
-        self.channel_names = self.__parse(channel_names)
 
         self.n_samples = samples  # Number of Samples to get at every callback
 
@@ -75,11 +74,10 @@ class Reader():
         tasks = []
         for i in range(len(self.physical_channels)):
             channel = self.physical_channels[i]
-            channel_name = self.channel_names[i]
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan(channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
+            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])

@@ -4,7 +4,7 @@ __author__ = 'Joaquim Leitão'
 import daqmxlib
 import time
 
-my_reader = daqmxlib.Reader(["Dev1/ai1", "Dev1/ai4"], ["device1", "device2"])
+my_reader = daqmxlib.Reader(["Dev1/ai1", "Dev1/ai4"])
 
 # my_reader.start_all_tasks()
 while True:
