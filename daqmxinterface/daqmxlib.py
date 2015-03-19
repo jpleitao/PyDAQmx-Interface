@@ -55,7 +55,7 @@ class Reader():
     """
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
-    def __init__(self, physical_channels=["Dev1/ai1"], channel_names="", samples=1):
+    def __init__(self, physical_channels=["Dev1/ai1"], channel_names=["ai1"], samples=1):
         """
         Class Constructor
         :param physical_channels: A list of physicial channels used to acquire the data
@@ -92,7 +92,7 @@ class Reader():
         :param data: The mentioned list or string
         :return: The parsed data in the list format
         """
-        if isinstance(type(data), str):
+        if isinstance(data, str):
             return [data]
 
         return data
@@ -164,8 +164,9 @@ class Reader():
         Starts all the created tasks
         :return: This method does not return any value
         """
-        for task in self.tasks.keys():
-            self.tasks[task].StartTask()
+        for name in self.tasks.keys():
+            task = self.tasks[name]
+            task.StartTask()
 
     def start_task(self, name):
         """
