@@ -23,32 +23,95 @@ VAL_RSE = PyDAQmx.DAQmx_Val_RSE
 VAL_ACQUIRED_INTO_BUFFER = PyDAQmx.DAQmx_Val_Acquired_Into_Buffer
 
 
-class Actuator(PyDAQmx.Task):
+class Actuator():
     """
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
-    def __init__(self, physical_channel="Dev1/ao0", channel_name=""):
-        """Class Constructor"""
-        PyDAQmx.Task.__init__(self)  # Call PyDAQmx.Task's constructor
-        self.CreateAOVoltageChan(physical_channel, channel_name, DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
-                                 VAL_VOLTS, None)  # Create Voltage Channel
+    def __init__(self, physical_channels="Dev1/ao0"):
+        """
+        Class Constructor
+        :param physical_channels: A list of physicial channels used to acquire the data
+        """
 
-    def start_task(self):
-        """Starts the task, but does not start its execution"""
-        self.StartTask()
+        # Get the set of physical channels from which we are going to extract the data and do the same for the names of
+        # the channels
+        self.physical_channels = self.__parse(physical_channels)
+        self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
 
-    def stop_task(self):
-        """Stops the task's execution"""
-        self.StopTask()
+        # Create tasks, one for each physical channel
+        tasks = []
+        for i in range(len(self.physical_channels)):
+            channel = self.physical_channels[i]
+            task = PyDAQmx.Task()
+            tasks.append(task)
+            # Create Voltage Channel to read from the given physical channel
+            task.CreateAOVoltageChan(channel, "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
+                                     VAL_VOLTS, None)  # Create Voltage Channel
+        # Save all the tasks
+        self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
 
-    def clear_task(self):
-        """Clears the task"""
-        self.ClearTask()
+    @staticmethod
+    def __parse(data):
+        """
+        Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
+        names into a list
+        :param data: The mentioned list or string
+        :return: The parsed data in the list format
+        """
+        if isinstance(data, str):
+            return [data]
 
-    def execute_task(self, num_samps_channel, message, auto_start=1, timeout=0):
-        """Executes the given task, starting its actuation"""
-        self.WriteAnalogF64(num_samps_channel, auto_start, timeout, GROUP_BY_CHANNEL, message, None,
-                            None)
+        return data
+
+    def execute_all_tasks(self, num_samps_channel, message, auto_start=1, timeout=0):
+        """
+        Executes all the tasks created. Ideally this should be use to send the same message to a set of actuators
+        :param num_samps_channel: The number of samples, per channel, to write
+        :param message: he message to send to the actuator
+        :param auto_start: Specifies whether or not this function automatically starts the task if you do not start it.
+        :param timeout:The amount of time, in seconds, to wait for this function to write all the samples
+                        (-1 for inifinite)
+        :return:
+        """
+
+    def execute_task(self, name, num_samps_channel, message, auto_start=1, timeout=0):
+        """
+        Executes a given task, starting its actuation (That is, sends a given message to a given actuator)
+        :param name: The name of the task to execute
+        :param num_samps_channel: The number of samples, per channel, to write
+        :param message: The message to send to the actuator
+        :param auto_start: Specifies whether or not this function automatically starts the task if you do not start it.
+        :param timeout: The amount of time, in seconds, to wait for this function to write all the samples
+                        (-1 for inifinite)
+        :return: A boolean value, indicating the success or failure of the execution
+        """
+        if name in self.tasks.keys():
+            self.tasks[name].WriteAnalogF64(num_samps_channel, auto_start, timeout, GROUP_BY_CHANNEL, message, None,
+                                            None)
+            return True
+        return False
+
+    def stop_all_tasks(self):
+        """
+        Stops all the created tasks
+        :return: This method does not return any value
+        """
+        for task in self.tasks.keys():
+            self.tasks[task].StopTask()
+            self.tasks[task].ClearTask()
+
+    def stop_task(self, name):
+        """
+        Stops the task identified by the given name
+        :param name: The name of the task we want to start
+        :return: True in case of success and False otherwise
+        """
+        if name in self.tasks.keys():
+            task = self.tasks[name]
+            task.StopTask()
+            task.ClearTask()
+            return True
+        return False
 
 
 class Reader():
@@ -143,6 +206,9 @@ class Reader():
         :param name: The name of the channel from which we are going to read the data
         :return: Returns an array with the data read
         """
+
+        # FIXME: SHOULD AVOID REPETITIVE READS
+
         if name is None:
             name = self.physical_channels[0]
 
