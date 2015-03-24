@@ -71,8 +71,13 @@ class Actuator():
         :param auto_start: Specifies whether or not this function automatically starts the task if you do not start it.
         :param timeout:The amount of time, in seconds, to wait for this function to write all the samples
                         (-1 for inifinite)
-        :return:
+        :return: A boolean value: True is all the tasks started without major problems; False otherwise
         """
+        for name in self.physical_channels:
+            result = self.execute_task(name, num_samps_channel, message, auto_start, timeout)
+            if not result:
+                return False
+        return True
 
     def execute_task(self, name, num_samps_channel, message, auto_start=1, timeout=0):
         """
