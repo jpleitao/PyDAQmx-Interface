@@ -115,6 +115,9 @@ class Reader():
     """
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
+
+    # TODO: CHANGE THIS! SHOULD INHERIT TASK TO SUPPORT MULTIPLE READS
+
     def __init__(self, channels_samples={"Dev1/ai1": 1}):
         """
         Class Constructor
@@ -175,7 +178,6 @@ class Reader():
         :param physical_channel: The task to remove
         :return: True in case of success, otherwise returns False
         """
-
         # Check if the given physical channel is in the list of physical channels
         if physical_channel in self.physical_channels:
             # Get the index of the given physical channel in the list of physical channels
