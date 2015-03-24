@@ -111,7 +111,6 @@ class Reader():
         """
         Class Constructor
         :param physical_channels: A list of physical channels used to acquire the data
-        :param channel_names: The names of the channels - MUST HAVE THE SAME LEN AS physical_channels
         :param samples: The number of samples to collect
         """
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
@@ -147,15 +146,14 @@ class Reader():
 
         return data
 
-    def add_task(self, physical_channel, channel_name=""):
+    def add_task(self, physical_channel):
         """
         Adds a task to the set of tasks
         :param physical_channel: The physical channel where the data will be collected
-        :param channel_name: The name of the given channel
         """
         # Create a task and a handle for the task
         task = PyDAQmx.Task()
-        task.CreateAIVoltageChan(physical_channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+        task.CreateAIVoltageChan(physical_channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                  VAL_VOLTS, None)
 
         self.tasks[physical_channel] = task

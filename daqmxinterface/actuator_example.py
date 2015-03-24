@@ -15,4 +15,4 @@ for current in data:
     data2 = numpy.array(current)
     my_actuator.execute_task("Dev1/ao0", 1, data2)
     print("Executing task...")
-    time.sleep(3)
+    time.sleep(1)
