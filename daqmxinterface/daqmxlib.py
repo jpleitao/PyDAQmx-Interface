@@ -190,33 +190,39 @@ class Reader():
 
         return True
 
-    def read_all(self):
+    def read_all(self, timeout=0):
         """
         Reads data from all the active physical channels
+        :param timeout: The amount of time, in seconds, to wait for the function to read the sample(s)
+                        (-1 for infinite)
         :return: Returns a dictionary with the data read from all the active physical channels
         """
-        return dict([(name, self.read(name)) for name in self.physical_channels])
+        return dict([(name, self.read(name, timeout)) for name in self.physical_channels])
 
-    def read(self, name=None):
+    def read(self, name=None, timeout=0):
         """
         Reads data from a given physical channel
         :param name: The name of the channel from which we are going to read the data
+        :param timeout: The amount of time, in seconds, to wait for the function to read the sample(s)
+                        (-1 for infinite)
         :return: Returns an array with the data read
         """
         if name is None:
             name = self.physical_channels[0]
 
         index = self.physical_channels.index(name)
+        num_samps_channel = self.n_samples[index]
         # Get task handle        
         task = self.tasks[name]
         # Prepare the data to be read
-        data = numpy.zeros((self.n_samples[index],), dtype=numpy.float64)
+        data = numpy.zeros((num_samps_channel,), dtype=numpy.float64)
         # data = AI_data_type()
         read = PyDAQmx.int32()
         # Start the task
         task.StartTask()
         # Read the data and return it!
-        PyDAQmx.Task.ReadAnalogF64(task, 1, 10.0, GROUP_BY_CHANNEL, data, 1, PyDAQmx.byref(read), None)
+        PyDAQmx.Task.ReadAnalogF64(task, num_samps_channel, timeout, GROUP_BY_CHANNEL, data, num_samps_channel,
+                                   PyDAQmx.byref(read), None)
         # Stop the current task
         task.StopTask()
         return data
