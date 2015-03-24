@@ -203,16 +203,14 @@ class Reader():
         :param name: The name of the channel from which we are going to read the data
         :return: Returns an array with the data read
         """
-
-        # TODO: SHOULD AVOID REPETITIVE READS? SPECIALLY IF READING FROM read_all?
-
         if name is None:
             name = self.physical_channels[0]
 
+        index = self.physical_channels.index(name)
         # Get task handle        
         task = self.tasks[name]
         # Prepare the data to be read
-        data = numpy.zeros((self.n_samples,), dtype=numpy.float64)
+        data = numpy.zeros((self.n_samples[index],), dtype=numpy.float64)
         # data = AI_data_type()
         read = PyDAQmx.int32()
         # Start the task
