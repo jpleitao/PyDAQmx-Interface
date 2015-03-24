@@ -102,28 +102,6 @@ class Actuator():
             return True
         return False
 
-    def stop_all_tasks(self):
-        """
-        Stops all the created tasks
-        :return: This method does not return any value
-        """
-        for task in self.tasks.keys():
-            self.tasks[task].StopTask()
-            self.tasks[task].ClearTask()
-
-    def stop_task(self, name):
-        """
-        Stops the task identified by the given name
-        :param name: The name of the task we want to start
-        :return: True in case of success and False otherwise
-        """
-        if name in self.tasks.keys():
-            task = self.tasks[name]
-            task.StopTask()
-            task.ClearTask()
-            return True
-        return False
-
 
 class Reader():
     """
