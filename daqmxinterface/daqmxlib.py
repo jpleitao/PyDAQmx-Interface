@@ -32,6 +32,10 @@ class Actuator():
         Class Constructor
         :param physical_channels: A list of physical channels used to acquire the data
         """
+        # Check for argument's type
+        if not isinstance(physical_channels, dict) and not isinstance(physical_channels, str):
+            raise TypeError("Wrong type for argument channels_samples: Expected <class 'dict'> or <class 'str'> "
+                            "and found " + str(type(physical_channels)))
 
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
@@ -62,6 +66,10 @@ class Actuator():
             return [data]
 
         return data
+
+    # TODO: Method to add physical channels
+
+    # TODO: Method to remove physical channels
 
     def execute_all_tasks(self, num_samps_channel, message, auto_start=1, timeout=0):
         """
@@ -107,24 +115,27 @@ class Reader():
     """
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
-    def __init__(self, physical_channels=["Dev1/ai1"], samples=1):
+    def __init__(self, channels_samples={"Dev1/ai1": 1}):
         """
         Class Constructor
-        :param physical_channels: A list of physical channels used to acquire the data
-        :param samples: The number of samples to collect
+        :param channels_samples: A dictionary with a mapping between the physical channels used to acquire the data and
+                                 the number of samples to collect from each one of them
         """
+        # Check for argument's type
+        if not isinstance(channels_samples, dict):
+            raise TypeError("Wrong type for argument channels_samples: Expected <class 'dict'> and found " +
+                            str(type(channels_samples)))
+
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
-        self.physical_channels = self.__parse_channels(physical_channels)
-        self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
+        self.physical_channels = list(channels_samples.keys())
+        self.n_samples = []
 
-        # FIXME: Implement this with a list of samples per channel -- Could receive a dictionary!
-        self.n_samples = samples
-
-        # Create the tasks, one to read in each channel (But first create the task handles)
         tasks = []
-        for i in range(len(self.physical_channels)):
-            channel = self.physical_channels[i]
+        for channel in self.physical_channels:
+            # Store the number of samples to read from that channel
+            self.n_samples.append(channels_samples[channel])
+            # Create the tasks, one to read in each channel and add them to the list of tasks
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
@@ -133,44 +144,48 @@ class Reader():
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
 
-    @staticmethod
-    def __parse_channels(data):
-        """
-        Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
-        names into a list
-        :param data: The mentioned list or string
-        :return: The parsed data in the list format
-        """
-        if isinstance(data, str):
-            return [data]
-
-        return data
-
-    def add_task(self, physical_channel):
+    def add_tasks(self, channel_samples):
         """
         Adds a task to the set of tasks
-        :param physical_channel: The physical channel where the data will be collected
+        :param channel_samples: A dictionary with a mapping between the physical channels used to acquire the data and
+                                the number of samples to collect from each one of them
         """
-        # Create a task and a handle for the task
-        task = PyDAQmx.Task()
-        task.CreateAIVoltageChan(physical_channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
-                                 VAL_VOLTS, None)
+        # Check for argument's type
+        if not isinstance(channel_samples, dict):
+            raise TypeError("Wrong type for argument channels_samples: Expected <class 'dict'> and found " +
+                            str(type(channel_samples)))
 
-        self.tasks[physical_channel] = task
-        self.physical_channels.append(physical_channel)
+        # Get the list of channels
+        physical_channels = list(channel_samples.keys())
+
+        for channel in physical_channels:
+            # Update the list of physical channels
+            self.physical_channels.append(channel)
+            # Store the number of samples to collect for each of the given channels
+            self.n_samples.append(channel_samples[channel])
+            # Create a task and the voltage channel and store it
+            task = PyDAQmx.Task()
+            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+                                     VAL_VOLTS, None)
+            self.tasks[channel] = task
 
     def remove_task(self, physical_channel):
         """
         Removes a given Task from the set of active Tasks
-        :param physical_channel:
+        :param physical_channel: The task to remove
         :return: True in case of success, otherwise returns False
         """
 
-        # Stop current task
-        if not self.stop_task(physical_channel):
-            return False
+        # Check if the given physical channel is in the list of physical channels
+        if physical_channel in self.physical_channels:
+            # Get the index of the given physical channel in the list of physical channels
+            index = self.physical_channels.index(physical_channel)
+            # Remove the element from the list of physical channels
+            self.physical_channels.remove(physical_channel)
+            # Remove the number of samples associated with the given channel
+            self.n_samples.remove(self.n_samples[index])
 
-        # Remove the task and the task handle
+        # Remove the task
         del self.tasks[physical_channel]
 
         return True
@@ -189,7 +204,7 @@ class Reader():
         :return: Returns an array with the data read
         """
 
-        # TODO: SHOULD AVOID REPETITIVE READS
+        # TODO: SHOULD AVOID REPETITIVE READS? SPECIALLY IF READING FROM read_all?
 
         if name is None:
             name = self.physical_channels[0]
