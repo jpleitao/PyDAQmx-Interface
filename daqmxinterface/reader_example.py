@@ -8,7 +8,7 @@ import time
 # This constructor receives a dictionary as a parameter, specifying the channels used to obtain the data and the
 # desired number of samples to collect from each channel (Until further notice this number should stay 1 due to
 # problems in the PyDAQmx library to collect more than one element)
-my_reader = daqmxlib.Reader({"Dev1/ai1": 1, "Dev1/ai3": 1})
+my_reader = daqmxlib.Reader({"Dev1/ai1": 1, "Dev1/ai4": 1})
 
 # We can simply add a task by calling "add_task", specifying the desired channel and the number of samples to
 # collect from that channel
