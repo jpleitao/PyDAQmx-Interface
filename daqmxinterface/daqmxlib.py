@@ -91,8 +91,14 @@ class Actuator():
         :return: A boolean value, indicating the success or failure of the execution
         """
         if name in self.tasks.keys():
-            self.tasks[name].WriteAnalogF64(num_samps_channel, auto_start, timeout, GROUP_BY_CHANNEL, message, None,
-                                            None)
+            # Get the task
+            task = self.tasks[name]
+            # Start the task
+            task.StartTask()
+            # Write to buffer
+            task.WriteAnalogF64(num_samps_channel, auto_start, timeout, GROUP_BY_CHANNEL, message, None,
+                                None)
+            task.StopTask()
             return True
         return False
 
@@ -126,19 +132,21 @@ class Reader():
     def __init__(self, physical_channels=["Dev1/ai1"], samples=1):
         """
         Class Constructor
-        :param physical_channels: A list of physicial channels used to acquire the data
+        :param physical_channels: A list of physical channels used to acquire the data
         :param channel_names: The names of the channels - MUST HAVE THE SAME LEN AS physical_channels
         :param samples: The number of samples to collect
         """
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
-        self.physical_channels = self.__parse(physical_channels)
+        self.physical_channels = self.__parse_channels(physical_channels)
         self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
+        # self.n_samples = self.__parse_samples(samples)  # Number of Samples to get at every callback
 
-        self.n_samples = samples  # Number of Samples to get at every callback
+        # self.n_samples = dict()
+
+        self.n_samples = samples
 
         # Create the tasks, one to read in each channel (But first create the task handles)
-        self.task_handles = dict([(channel, PyDAQmx.TaskHandle(0)) for channel in self.physical_channels])
         tasks = []
         for i in range(len(self.physical_channels)):
             channel = self.physical_channels[i]
@@ -151,7 +159,7 @@ class Reader():
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
 
     @staticmethod
-    def __parse(data):
+    def __parse_channels(data):
         """
         Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
         names into a list
@@ -163,21 +171,19 @@ class Reader():
 
         return data
 
-    def add_task(self, physical_channel, channel_name, samples):
+    def add_task(self, physical_channel, channel_name=""):
         """
         Adds a task to the set of tasks
-        :param physical_channel:
-        :param channel_name:
-        :param samples:
-        :return:
+        :param physical_channel: The physical channel where the data will be collected
+        :param channel_name: The name of the given channel
         """
         # Create a task and a handle for the task
-        self.task_handles[channel_name] = PyDAQmx.TaskHandle(0)
         task = PyDAQmx.Task()
         task.CreateAIVoltageChan(physical_channel, channel_name, VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                  VAL_VOLTS, None)
 
-        self.tasks[channel_name] = task
+        self.tasks[physical_channel] = task
+        self.physical_channels.append(physical_channel)
 
     def remove_task(self, physical_channel):
         """
@@ -192,9 +198,6 @@ class Reader():
 
         # Remove the task and the task handle
         del self.tasks[physical_channel]
-
-        if physical_channel in self.task_handles.keys():
-            del self.task_handles[physical_channel]
 
         return True
 
@@ -218,59 +221,15 @@ class Reader():
             name = self.physical_channels[0]
 
         # Get task handle        
-        task_handle = self.tasks[name]
+        task = self.tasks[name]
         # Prepare the data to be read
         data = numpy.zeros((self.n_samples,), dtype=numpy.float64)
         # data = AI_data_type()
         read = PyDAQmx.int32()
-
-        PyDAQmx.Task.StartTask(task_handle)
-
+        # Start the task
+        task.StartTask()
         # Read the data and return it!
-        PyDAQmx.Task.ReadAnalogF64(task_handle, 1, 10.0, GROUP_BY_CHANNEL, data, 1, PyDAQmx.byref(read), None)
-
-        PyDAQmx.Task.StopTask(task_handle)
+        PyDAQmx.Task.ReadAnalogF64(task, 1, 10.0, GROUP_BY_CHANNEL, data, 1, PyDAQmx.byref(read), None)
+        # Stop the current task
+        task.StopTask()
         return data
-
-    def start_all_tasks(self):
-        """
-        Starts all the created tasks
-        :return: This method does not return any value
-        """
-        for name in self.tasks.keys():
-            task = self.tasks[name]
-            task.StartTask()
-
-    def start_task(self, name):
-        """
-        Starts the task identified by the given name
-        :param name: The name of the task we want to start
-        :return: True in case of success and False otherwise
-        """
-        if name in self.tasks.keys():
-            task = self.tasks[name]
-            task.StartTask()
-            return True
-        return False
-
-    def stop_all_tasks(self):
-        """
-        Stops all the created tasks
-        :return: This method does not return any value
-        """
-        for task in self.tasks.keys():
-            self.tasks[task].StopTask()
-            self.tasks[task].ClearTask()
-
-    def stop_task(self, name):
-        """
-        Stops the task identified by the given name
-        :param name: The name of the task we want to start
-        :return: True in case of success and False otherwise
-        """
-        if name in self.tasks.keys():
-            task = self.tasks[name]
-            task.StopTask()
-            task.ClearTask()
-            return True
-        return False
