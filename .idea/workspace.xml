@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0857850f-8e22-4114-9d4b-c85a3afc4d33" name="Default" comment="Code cleanup">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/daqmxinterface/actuator_example.py" afterPath="$PROJECT_DIR$/daqmxinterface/actuator_example.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/daqmxinterface/daqmxlib.py" afterPath="$PROJECT_DIR$/daqmxinterface/daqmxlib.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -509,7 +508,13 @@
       <option name="project" value="LOCAL" />
       <updated>1427210574204</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Small change in one example">
+      <created>1427210743275</created>
+      <option name="number" value="00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1427210743275</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -562,7 +567,8 @@
     <MESSAGE value="First version of the Actuator Class finished" />
     <MESSAGE value="Major code refactoring. Details changed in both the implementations of the Reader and the Actuator and in their example scripts" />
     <MESSAGE value="Code cleanup" />
-    <option name="LAST_COMMIT_MESSAGE" value="Code cleanup" />
+    <MESSAGE value="Small change in one example" />
+    <option name="LAST_COMMIT_MESSAGE" value="Small change in one example" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

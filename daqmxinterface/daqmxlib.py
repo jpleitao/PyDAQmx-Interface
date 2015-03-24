@@ -27,10 +27,10 @@ class Actuator():
     """
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
-    def __init__(self, physical_channels="Dev1/ao0"):
+    def __init__(self, physical_channels=["Dev1/ao0"]):
         """
         Class Constructor
-        :param physical_channels: A list of physicial channels used to acquire the data
+        :param physical_channels: A list of physical channels used to acquire the data
         """
 
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
@@ -118,10 +118,8 @@ class Reader():
         # the channels
         self.physical_channels = self.__parse_channels(physical_channels)
         self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
-        # self.n_samples = self.__parse_samples(samples)  # Number of Samples to get at every callback
 
-        # self.n_samples = dict()
-
+        # FIXME: Implement this with a list of samples per channel -- Could receive a dictionary!
         self.n_samples = samples
 
         # Create the tasks, one to read in each channel (But first create the task handles)
@@ -193,7 +191,7 @@ class Reader():
         :return: Returns an array with the data read
         """
 
-        # FIXME: SHOULD AVOID REPETITIVE READS
+        # TODO: SHOULD AVOID REPETITIVE READS
 
         if name is None:
             name = self.physical_channels[0]
