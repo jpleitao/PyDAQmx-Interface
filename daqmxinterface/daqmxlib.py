@@ -19,6 +19,7 @@ GROUP_BY_CHANNEL = PyDAQmx.DAQmx_Val_GroupByChannel
 GROUP_BY_SCAN_NUMBER = PyDAQmx.DAQmx_Val_GroupByScanNumber
 VAL_RISING = PyDAQmx.DAQmx_Val_Rising
 VAL_CONT_SAMPS = PyDAQmx.DAQmx_Val_ContSamps
+VAL_FINITE_SAMPS = PyDAQmx.DAQmx_Val_FiniteSamps
 VAL_RSE = PyDAQmx.DAQmx_Val_RSE
 VAL_ACQUIRED_INTO_BUFFER = PyDAQmx.DAQmx_Val_Acquired_Into_Buffer
 
@@ -27,6 +28,7 @@ class Actuator():
     """
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
+
     def __init__(self, physical_channels=["Dev1/ao0"]):
         """
         Class Constructor
@@ -116,8 +118,6 @@ class Reader():
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
 
-    # TODO: CHANGE THIS! SHOULD INHERIT TASK TO SUPPORT MULTIPLE READS
-
     def __init__(self, channels_samples={"Dev1/ai1": 1}):
         """
         Class Constructor
@@ -136,16 +136,26 @@ class Reader():
 
         tasks = []
         for channel in self.physical_channels:
+            current_samples = channels_samples[channel]
             # Store the number of samples to read from that channel
-            self.n_samples.append(channels_samples[channel])
-            # Create the tasks, one to read in each channel and add them to the list of tasks
+            self.n_samples.append(current_samples)
+            # Create the tasks, one to read in each channel
             task = PyDAQmx.Task()
-            tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
             task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
+            # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
+            # number of samples per second: 10000.0
+            task.CfgSampClkTiming("", 10000.0, VAL_RISING, VAL_CONT_SAMPS, current_samples)
+            # Add the task to the list of tasks
+            tasks.append(task)
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
+
+    def start_tasks(self):
+        for current in self.tasks.keys():
+            task = self.tasks[current]
+            task.StartTask()
 
     def add_tasks(self, channel_samples):
         """
@@ -162,14 +172,18 @@ class Reader():
         physical_channels = list(channel_samples.keys())
 
         for channel in physical_channels:
+            current_samples = channel_samples[channel]
             # Update the list of physical channels
             self.physical_channels.append(channel)
             # Store the number of samples to collect for each of the given channels
-            self.n_samples.append(channel_samples[channel])
+            self.n_samples.append(current_samples)
             # Create a task and the voltage channel and store it
             task = PyDAQmx.Task()
             task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
+            # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
+            # number of samples per second: 10000.0
+            task.CfgSampClkTiming("", 10000.0, VAL_RISING, VAL_CONT_SAMPS, current_samples)
             self.tasks[channel] = task
 
     def remove_task(self, physical_channel):
@@ -214,17 +228,15 @@ class Reader():
 
         index = self.physical_channels.index(name)
         num_samps_channel = self.n_samples[index]
-        # Get task handle        
+        # Get task handle
         task = self.tasks[name]
         # Prepare the data to be read
-        data = numpy.zeros((num_samps_channel,), dtype=numpy.float64)
+        # data = numpy.zeros((num_samps_channel,), dtype=numpy.float64)
+        data = numpy.zeros(num_samps_channel)
         # data = AI_data_type()
         read = PyDAQmx.int32()
-        # Start the task
-        task.StartTask()
         # Read the data and return it!
-        PyDAQmx.Task.ReadAnalogF64(task, num_samps_channel, timeout, GROUP_BY_CHANNEL, data, num_samps_channel,
-                                   PyDAQmx.byref(read), None)
-        # Stop the current task
-        task.StopTask()
+        # FIXME: CONFIRM THAT WE WANT GROUP_BY_CHANNEL HERE!!! -- Should be irrelevant
+        task.ReadAnalogF64(num_samps_channel, 10.0, GROUP_BY_SCAN_NUMBER, data, num_samps_channel,
+                           PyDAQmx.byref(read), None)
         return data

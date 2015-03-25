@@ -12,9 +12,10 @@ my_reader = daqmxlib.Reader({"Dev1/ai1": 1, "Dev1/ai4": 1})
 
 # We can simply add a task by calling "add_task", specifying the desired channel and the number of samples to
 # collect from that channel
-my_reader.add_tasks({"Dev1/ai2": 1})
+# my_reader.add_tasks({"Dev1/ai2": 1})
+
+my_reader.start_tasks()
 
 while True:
     # With read_all we can read the elements from all the specified channels
     print my_reader.read_all()
-    time.sleep(1)
