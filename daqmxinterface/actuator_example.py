@@ -5,7 +5,7 @@ import daqmxlib
 import numpy
 import time
 
-my_actuator = daqmxlib.Actuator(["Dev1/ao0"])
+my_actuator = daqmxlib.Actuator(["Dev1/ao1"])
 
 x = [i for i in range(10)]
 data = [numpy.abs(numpy.sin(i)) for i in x]

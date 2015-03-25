@@ -35,7 +35,7 @@ class Actuator():
         :param physical_channels: A list of physical channels used to acquire the data
         """
         # Check for argument's type
-        if not isinstance(physical_channels, dict) and not isinstance(physical_channels, str):
+        if not isinstance(physical_channels, list) and not isinstance(physical_channels, str):
             raise TypeError("Wrong type for argument channels_samples: Expected <class 'dict'> or <class 'str'> "
                             "and found " + str(type(physical_channels)))
 
@@ -68,10 +68,6 @@ class Actuator():
             return [data]
 
         return data
-
-    # TODO: Method to add physical channels
-
-    # TODO: Method to remove physical channels
 
     def execute_all_tasks(self, num_samps_channel, message, auto_start=1, timeout=0):
         """
@@ -206,7 +202,7 @@ class Reader():
 
         return True
 
-    def read_all(self, timeout=0):
+    def read_all(self, timeout=0.01):
         """
         Reads data from all the active physical channels
         :param timeout: The amount of time, in seconds, to wait for the function to read the sample(s)
@@ -215,7 +211,7 @@ class Reader():
         """
         return dict([(name, self.read(name, timeout)) for name in self.physical_channels])
 
-    def read(self, name=None, timeout=0):
+    def read(self, name=None, timeout=0.01):
         """
         Reads data from a given physical channel
         :param name: The name of the channel from which we are going to read the data
@@ -231,12 +227,13 @@ class Reader():
         # Get task handle
         task = self.tasks[name]
         # Prepare the data to be read
-        # data = numpy.zeros((num_samps_channel,), dtype=numpy.float64)
-        data = numpy.zeros(num_samps_channel)
-        # data = AI_data_type()
+        data = numpy.zeros((num_samps_channel,), dtype=numpy.float64)
         read = PyDAQmx.int32()
+        # Start the task
+        task.StartTask()
         # Read the data and return it!
-        # FIXME: CONFIRM THAT WE WANT GROUP_BY_CHANNEL HERE!!! -- Should be irrelevant
-        task.ReadAnalogF64(num_samps_channel, 10.0, GROUP_BY_SCAN_NUMBER, data, num_samps_channel,
+        task.ReadAnalogF64(num_samps_channel, timeout, GROUP_BY_CHANNEL, data, num_samps_channel,
                            PyDAQmx.byref(read), None)
+        # Stop the task
+        task.StopTask()
         return data
