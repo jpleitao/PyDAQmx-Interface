@@ -79,6 +79,7 @@ class Actuator():
                         (-1 for inifinite)
         :return: A boolean value: True is all the tasks started without major problems; False otherwise
         """
+        # TODO: CHECK FOR THE LIMITS OF THE MESSAGE
         for name in self.physical_channels:
             result = self.execute_task(name, num_samps_channel, message, auto_start, timeout)
             if not result:
@@ -96,6 +97,9 @@ class Actuator():
                         (-1 for inifinite)
         :return: A boolean value, indicating the success or failure of the execution
         """
+        # TODO: CHECK FOR THE LIMITS OF THE MESSAGE
+        # TODO: CHANGE "name" TO BE A LIST: FUNCTION SHOULD ALSO CHANGE NAME
+
         if name in self.tasks.keys():
             # Get the task
             task = self.tasks[name]
