@@ -213,6 +213,7 @@ class Reader():
                         (-1 for infinite)
         :return: Returns a dictionary with the data read from all the active physical channels
         """
+        # TODO: Parse the name (Remove the "Dev/")
         return dict([(name, self.read(name, timeout)) for name in self.physical_channels])
 
     def read(self, name=None, timeout=0.01):
