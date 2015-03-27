@@ -162,6 +162,31 @@ class Reader():
             task = self.tasks[current]
             task.StartTask()
 
+    def change_collected_samples(self, channel, number_samples):
+        """
+        Changes the number of samples collected in the specified physical channel
+        :param channel: The desired physical channel
+        :param number_samples: The new number of samples to collect
+        """
+        print channel
+
+        if channel in self.physical_channels:
+            # Create a new task for the given channel that is going to
+            task = PyDAQmx.Task()
+            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+                                     VAL_VOLTS, None)
+            # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
+            # number of samples per second: 10000.0
+            task.CfgSampClkTiming("", 10000.0, VAL_RISING, VAL_CONT_SAMPS, number_samples)
+            self.tasks[channel] = task
+
+            index = self.physical_channels.index(channel)
+            self.n_samples[index] = number_samples
+
+            return True
+        else:
+            raise TypeError("Attempt to change number of collected samples from a physical channel not already added")
+
     def add_tasks(self, channel_samples):
         """
         Adds a task to the set of tasks
