@@ -29,7 +29,7 @@ class Actuator():
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, physical_channels=["Dev1/ao0"]):
+    def __init__(self, physical_channels=["ao0"]):
         """
         Class Constructor
         :param physical_channels: A list of physical channels used to acquire the data
@@ -51,7 +51,7 @@ class Actuator():
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAOVoltageChan(channel, "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
+            task.CreateAOVoltageChan("Dev1/" + str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
                                      VAL_VOLTS, None)  # Create Voltage Channel
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
@@ -123,7 +123,7 @@ class Reader():
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, channels_samples={"Dev1/ai1": 1}):
+    def __init__(self, channels_samples={"ai1": 1}):
         """
         Class Constructor
         :param channels_samples: A dictionary with a mapping between the physical channels used to acquire the data and
@@ -147,7 +147,7 @@ class Reader():
             # Create the tasks, one to read in each channel
             task = PyDAQmx.Task()
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
+            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -172,7 +172,7 @@ class Reader():
         if channel in self.physical_channels:
             # Create a new task for the given channel that is going to
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -208,7 +208,7 @@ class Reader():
             self.n_samples.append(current_samples)
             # Create a task and the voltage channel and store it
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan(channel, "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -235,28 +235,44 @@ class Reader():
 
         return True
 
-    def read_all(self, timeout=0.01):
+    def read_all(self, timeout=0.01, num_samples=None):
         """
         Reads data from all the active physical channels
         :param timeout: The amount of time, in seconds, to wait for the function to read the sample(s)
                         (-1 for infinite)
+        :param num_samples: A list with the number of samples to acquire for each channel
         :return: Returns a dictionary with the data read from all the active physical channels
         """
-        return dict([(name.split('/')[1], self.read(name, timeout)) for name in self.physical_channels])
 
-    def read(self, name=None, timeout=0.01):
+        if num_samples is None:
+            return dict([(name, self.read(name, timeout)) for name in self.physical_channels])
+        elif not isinstance(num_samples, dict):
+            raise TypeError("Wrong type for argument num_samples: Expected <class 'dict'> and found " +
+                            str(type(num_samples)))
+
+        contents = {}
+        for name in self.physical_channels:
+            current_number_samples = num_samples[name]
+            contents[name] = self.read(name, timeout, current_number_samples)
+        return contents
+
+    def read(self, name=None, timeout=0.01, num_samples=None):
         """
         Reads data from a given physical channel
         :param name: The name of the channel from which we are going to read the data
         :param timeout: The amount of time, in seconds, to wait for the function to read the sample(s)
                         (-1 for infinite)
+        :param num_samples: The number of samples to acquire
         :return: Returns an array with the data read
         """
         if name is None:
             name = self.physical_channels[0]
+        if num_samples is None:
+            index = self.physical_channels.index(name)
+            num_samps_channel = self.n_samples[index]
+        else:
+            num_samps_channel = num_samples
 
-        index = self.physical_channels.index(name)
-        num_samps_channel = self.n_samples[index]
         # Get task handle
         task = self.tasks[name]
         # Prepare the data to be read
