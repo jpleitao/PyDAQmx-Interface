@@ -168,7 +168,6 @@ class Reader():
         :param channel: The desired physical channel
         :param number_samples: The new number of samples to collect
         """
-        print channel
 
         if channel in self.physical_channels:
             # Create a new task for the given channel that is going to
