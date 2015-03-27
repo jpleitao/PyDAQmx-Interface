@@ -2,13 +2,13 @@
 __author__ = 'Joaquim Leitão'
 
 import daqmxlib
-import numpy
+import math
 import time
 
 my_actuator = daqmxlib.Actuator(["Dev1/ao1"])
 
 x = [i for i in range(10)]
-data = [numpy.abs(numpy.sin(i)) for i in x]
+data = [abs(math.sin(i)) for i in x]
 print data
 
 for current in data:
