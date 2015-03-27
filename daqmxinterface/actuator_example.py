@@ -12,6 +12,5 @@ data = [abs(math.sin(i)) for i in x]
 print data
 
 for current in data:
-    my_actuator.execute_task("Dev1/ao0", 1, current)
-    print("Executing task...")
+    print "Executing task... " + str(my_actuator.execute_task("Dev1/ao1", 1, current)) + "!"
     time.sleep(1)

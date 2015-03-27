@@ -100,6 +100,9 @@ class Actuator():
         # TODO: CHECK FOR THE LIMITS OF THE MESSAGE
         # TODO: CHANGE "name" TO BE A LIST: FUNCTION SHOULD ALSO CHANGE NAME
 
+        # Message has to be a numpy array, so lets convert it to the desired data type
+        message = numpy.array(message)
+
         if name in self.tasks.keys():
             # Get the task
             task = self.tasks[name]
