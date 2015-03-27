@@ -240,4 +240,5 @@ class Reader():
                            PyDAQmx.byref(read), None)
         # Stop the task
         task.StopTask()
-        return data
+        # Return in a list instead of numpy.array
+        return data.tolist()

@@ -12,7 +12,6 @@ data = [numpy.abs(numpy.sin(i)) for i in x]
 print data
 
 for current in data:
-    data2 = numpy.array(current)
-    my_actuator.execute_task("Dev1/ao0", 1, data2)
+    my_actuator.execute_task("Dev1/ao0", 1, current)
     print("Executing task...")
     time.sleep(1)
