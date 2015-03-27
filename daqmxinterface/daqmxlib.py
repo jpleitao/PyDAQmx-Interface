@@ -73,13 +73,12 @@ class Actuator():
         """
         Executes all the tasks created. Ideally this should be use to send the same message to a set of actuators
         :param num_samps_channel: The number of samples, per channel, to write
-        :param message: he message to send to the actuator
+        :param message: The message to send to the actuator
         :param auto_start: Specifies whether or not this function automatically starts the task if you do not start it.
         :param timeout:The amount of time, in seconds, to wait for this function to write all the samples
                         (-1 for inifinite)
         :return: A boolean value: True is all the tasks started without major problems; False otherwise
         """
-        # TODO: CHECK FOR THE LIMITS OF THE MESSAGE
         for name in self.physical_channels:
             result = self.execute_task(name, num_samps_channel, message, auto_start, timeout)
             if not result:
@@ -97,11 +96,14 @@ class Actuator():
                         (-1 for inifinite)
         :return: A boolean value, indicating the success or failure of the execution
         """
-        # TODO: CHECK FOR THE LIMITS OF THE MESSAGE
         # TODO: CHANGE "name" TO BE A LIST: FUNCTION SHOULD ALSO CHANGE NAME
 
         # Message has to be a numpy array, so lets convert it to the desired data type
         message = numpy.array(message)
+
+        # Check for the limits of the message
+        message[message > DAQMX_MAX_ACTUATION_V] = DAQMX_MAX_ACTUATION_V
+        message[message < DAQMX_MIN_ACTUATION_V] = DAQMX_MIN_ACTUATION_V
 
         if name in self.tasks.keys():
             # Get the task
