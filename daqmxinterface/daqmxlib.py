@@ -42,7 +42,10 @@ class Actuator():
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
         self.physical_channels = self.__parse(physical_channels)
-        self.physical_channels = list(set(self.physical_channels))  # Remove duplicates
+
+        if self.physical_channels is None:
+            raise TypeError("Non-output channels specified to be used in the Actuator class. Only output channels are "
+                            "allowed")
 
         # Create tasks, one for each physical channel
         tasks = []
@@ -62,12 +65,21 @@ class Actuator():
         Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
         names into a list
         :param data: The mentioned list or string
-        :return: The parsed data in the list format
+        :return: The parsed data in the list format, or None if wrong or invalid data is provided
         """
         if isinstance(data, str):
-            return [data]
+            current_data = [data]
+        else:
+            current_data = data
 
-        return data
+        # Remove duplicates
+        current_data = list(set(current_data))
+
+        # Check if all the channels are output channels
+        for current_channel in current_data:
+            if "a0" not in current_channel:
+                return None
+        return current_data
 
     def execute_all_tasks(self, num_samps_channel, message, auto_start=1, timeout=0):
         """
@@ -136,8 +148,12 @@ class Reader():
 
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
-        self.physical_channels = list(channels_samples.keys())
+        self.physical_channels = self.__parse(channels_samples.keys())
         self.n_samples = []
+
+        if self.physical_channels is None:
+            raise TypeError("Non-input channels specified to be used in the Actuator class. Only input channels are "
+                            "allowed")
 
         tasks = []
         for channel in self.physical_channels:
@@ -156,6 +172,21 @@ class Reader():
             tasks.append(task)
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
+
+    @staticmethod
+    def __parse(data):
+        """
+        Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
+        names into a list
+        :param data: The mentioned list or string
+        :return: The parsed data in the list format, or None if wrong or invalid data is provided
+        """
+
+        # Check if all the channels are output channels
+        for current_channel in data:
+            if "ai" not in current_channel:
+                return None
+        return current_data
 
     def start_tasks(self):
         for current in self.tasks.keys():
