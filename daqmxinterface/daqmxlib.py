@@ -148,12 +148,8 @@ class Reader():
 
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
-        self.physical_channels = self.__parse(channels_samples.keys())
-        self.n_samples = []
-
-        if self.physical_channels is None:
-            raise TypeError("Non-input channels specified to be used in the Actuator class. Only input channels are "
-                            "allowed")
+        self.physical_channels = self.__parse(channels_samples)
+        self.n_samples = []            
 
         tasks = []
         for channel in self.physical_channels:
@@ -174,19 +170,31 @@ class Reader():
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
 
     @staticmethod
-    def __parse(data):
+    def __parse(channels_samples):
         """
-        Private Method that parses a list or a string containing either a set of physical_channels or a set of channel's
-        names into a list
-        :param data: The mentioned list or string
-        :return: The parsed data in the list format, or None if wrong or invalid data is provided
+        Private Method that parses a dictionary with a mapping between the physical channels used to acquire the data and
+        the number of samples to collect from each one of them, returning a list with the keys of the dictionary (the physical
+        channels to be used), or raises an exception if anything went wrong
+        :param channels_samples: The mentioned dictionary
+        :return: A list with the physical channels to be used
         """
 
+        # Get keys and values of the dictionary
+        keys = list(channels_samples.keys())
+        values = list(channels_samples.values())
+
         # Check if all the channels are output channels
-        for current_channel in data:
+        for current_channel in keys:
             if "ai" not in current_channel:
-                return None
-        return current_data
+                raise TypeError("Non-input channels specified to be used in the Reader class. Only input channels are "
+                                "allowed")
+
+        for current_samples in values:
+            if not isinstance(current_samples, int):
+                raise TypeError("Invalid argument for the 'channels_samples' parameter. Expected dictionary with keys of type "
+                                "<class 'str'> and values type <class 'int'>")
+
+        return keys
 
     def start_tasks(self):
         for current in self.tasks.keys():
@@ -199,8 +207,10 @@ class Reader():
         :param channel: The desired physical channel
         :param number_samples: The new number of samples to collect
         """
-        print channel
-        print self.physical_channels
+
+        if not isinstance(number_samples, int):
+            raise TypeError("Wrong type for parameter 'number_samples'. Expected <class 'int'> and found "
+                            + str(type(number_samples)))
 
         if channel in self.physical_channels:
             # Create a new task for the given channel that is going to
@@ -231,7 +241,11 @@ class Reader():
                             str(type(channel_samples)))
 
         # Get the list of channels
-        physical_channels = list(channel_samples.keys())
+        physical_channels = self.__parse(channels_samples)
+
+        if physical_channels is None:
+            raise TypeError("Non-input channels specified to be used in the Reader class. Only input channels are "
+                            "allowed")
 
         for channel in physical_channels:
             current_samples = channel_samples[channel]
