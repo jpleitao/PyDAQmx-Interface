@@ -110,7 +110,7 @@ class Actuator():
         """
         # TODO: CHANGE "name" TO BE A LIST: FUNCTION SHOULD ALSO CHANGE NAME
 
-        if (not isinstance(message, int)) or (not isinstance(message, float)):
+        if not (isinstance(message, int) or isinstance(message, float)):
             raise TypeError("Wrong message type for the task to be executed in channel " + str(name) + ". Message should "
                             "be an interger or float between 0 and 5") 
 
