@@ -245,7 +245,7 @@ class Reader():
                             str(type(channel_samples)))
 
         # Get the list of channels
-        physical_channels = self.__parse(channels_samples)
+        physical_channels = self.__parse(channel_samples)
 
         if physical_channels is None:
             raise TypeError("Non-input channels specified to be used in the Reader class. Only input channels are "
