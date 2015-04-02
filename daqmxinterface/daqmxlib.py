@@ -77,7 +77,7 @@ class Actuator():
 
         # Check if all the channels are output channels
         for current_channel in current_data:
-            if "a0" not in current_channel:
+            if "ao" not in current_channel:
                 return None
         return current_data
 
