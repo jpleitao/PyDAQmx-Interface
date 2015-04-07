@@ -158,6 +158,9 @@ class Reader():
         tasks = []
         for channel in self.physical_channels:
             current_samples = channels_samples[channel]
+            # current_samples should be an integer higher than 0. If it is not, assume the default value: 1
+            if current_samples <= 0:
+                current_samples = 1
             # Store the number of samples to read from that channel
             self.n_samples.append(current_samples)
             # Create the tasks, one to read in each channel
