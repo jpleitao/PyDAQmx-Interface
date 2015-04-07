@@ -9,15 +9,21 @@ import threading
 import daqmxlib
 import Pyro4
 
-TIMER_STEP = 1.0
+# Global Variables definition
 global MIN_READ_VALUE
 global MAX_READ_VALUE
 global can_actuate_ao0
 global can_actuate_ao1
+global board_connected
+
 MIN_READ_VALUE = -6
 MAX_READ_VALUE = -5
 can_actuate_ao0 = True
 can_actuate_ao1 = True
+board_connected = True
+
+# Constants definition
+TIMER_STEP = 1.0
 
 
 def check_board(board):
@@ -57,8 +63,10 @@ def check_board(board):
                 # Can actuate back in ai1
                 print "Can actuate back in ai1"
                 can_actuate_ao1 = True
+            board_connected = True
         except Exception, e:
             print "Board is not connected!\n" + str(e)
+            board_connected = False
         time.sleep(TIMER_STEP)
 
 
@@ -72,6 +80,9 @@ class BoardInteraction(object):
         self.reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1, "ai3": 1, "ai4": 1, "ai5": 1, "ai6": 1, "ai7": 1})
 
     def execute_task(self, name, num_samps_channel, message, auto_start=1, timeout=0):
+        if not board_connected:
+            return None
+            
         # Check if we can actuate in the given channel
         if name == "ao0" and not can_actuate_ao0:
             return False
@@ -81,9 +92,13 @@ class BoardInteraction(object):
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
     def read_all(self, timeout=0.01, num_samples=None):
+        if not board_connected:
+            return None
         return self.reader.read_all(timeout, num_samples)
 
     def change_collected_samples(self, physical_channel, number_samples):
+        if not board_connected:
+            return None
         return self.reader.change_collected_samples(physical_channel, number_samples)
 
 
