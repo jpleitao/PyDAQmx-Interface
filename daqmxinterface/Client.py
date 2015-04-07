@@ -17,12 +17,6 @@ x = [i for i in range(10)]
 data = [abs(math.sin(i)) for i in x]
 print data
 
-# try:
-#    board_interaction.change_collected_samples("ai0", 5)
-#    print "Changed number of collected samples"
-# except Exception, e:
-#    print e
-
 
 for current in data:
     result = board_interaction.execute_task("ao0", 1, current)

@@ -10,16 +10,46 @@ import daqmxlib
 import Pyro4
 
 TIMER_STEP = 1.0
+global MIN_READ_VALUE
+global MAX_READ_VALUE
+global can_actuate_ao0
+global can_actuate_ao1
+MIN_READ_VALUE = -6
+MAX_READ_VALUE = -5
+can_actuate_ao0 = True
+can_actuate_ao1 = True
 
 
 def check_board(board):
+    global MIN_READ_VALUE
+    global can_actuate_ao0
+    global can_actuate_ao1
     while True:
         try:
-            # print "Going to read"
-            board.read_all()
-            # print "Done!"
+            readings = board.read_all()
+
+            readings_ai0 = readings['ai0']
+            readings_ai1 = readings['ai1']
+
+            if can_actuate_ao0 and readings_ai0 <= MIN_READ_VALUE:
+                # Cannot actuate anymore in ai0
+                can_actuate_ao0 = False
+                # Send 0 to ao0
+                board.actuator.execute_task("ao0", 1, 0)
+            elif (not can_actuate_ao0) and readings_ai0 >= MAX_READ_VALUE:
+                # Can actuate back in ai0
+                can_actuate_ao0 = True
+
+            if can_actuate_ao1 and readings_ai1 <= MIN_READ_VALUE:
+                # Cannot actuate anymore in ai1
+                can_actuate_ao1 = False
+                # Send 0 to ao1
+                board.actuator.execute_task("ao1", 1, 0)
+            elif (not can_actuate_ao1) and readings_ai1 >= MAX_READ_VALUE:
+                # Can actuate back in ai1
+                can_actuate_ao1 = True
         except Exception, e:
-            print "Board is not connected!"
+            print "Board is not connected!\n" + str(e)
         time.sleep(TIMER_STEP)
 
 
@@ -33,6 +63,11 @@ class BoardInteraction(object):
         self.reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1, "ai3": 1, "ai4": 1, "ai5": 1, "ai6": 1, "ai7": 1})
 
     def execute_task(self, name, num_samps_channel, message, auto_start=1, timeout=0):
+        # Check if we can actuate in the given channel
+        if name == "ao0" and not can_actuate_ao0:
+            return False
+        elif name == "ao1" and not can_actuate_ao1:
+            return False
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
