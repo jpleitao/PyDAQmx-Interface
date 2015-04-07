@@ -7,7 +7,7 @@ In order to successfully run the contents of this package the following requirem
 
 * Python 2.7
 * NIDAQmx driver (only tested on the windows version)
-* PyDAQmx package (available in the PyDAQmx-1.3.1 directory of this repository or at http://pythonhosted.org/PyDAQmx/)
+* PyDAQmx package (available in the PyDAQmx-1.3.1 directory of this repository or at http://pythonhosted.org/PyDAQmx/ or at the package's official github repository page https://github.com/clade/PyDAQmx)
 
 ## Installation 
 ### PyDAQmx ([source](http://pythonhosted.org/PyDAQmx/))
