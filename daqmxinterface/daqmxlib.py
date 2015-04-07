@@ -215,8 +215,10 @@ class Reader():
         if not isinstance(number_samples, int):
             raise TypeError("Wrong type for parameter 'number_samples'. Expected <class 'int'> and found "
                             + str(type(number_samples)))
-
-        if channel in self.physical_channels:
+        elif number_samples <= 0:
+            # Invalid number of samples -- Simply return false
+            return False
+        elif channel in self.physical_channels:
             # Create a new task for the given channel that is going to
             task = PyDAQmx.Task()
             task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
