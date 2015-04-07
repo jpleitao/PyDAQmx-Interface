@@ -31,22 +31,31 @@ def check_board(board):
             readings_ai0 = readings['ai0']
             readings_ai1 = readings['ai1']
 
+            readings_ai0 = readings_ai0[0]
+            readings_ai1 = readings_ai1[0]
+
+            print "Read " + str(readings_ai0) + " and " + str(readings_ai1)
+
             if can_actuate_ao0 and readings_ai0 <= MIN_READ_VALUE:
                 # Cannot actuate anymore in ai0
+                print "Cannot actuate anymore in ai0"
                 can_actuate_ao0 = False
                 # Send 0 to ao0
                 board.actuator.execute_task("ao0", 1, 0)
             elif (not can_actuate_ao0) and readings_ai0 >= MAX_READ_VALUE:
                 # Can actuate back in ai0
+                print "Can actuate back in ai0"
                 can_actuate_ao0 = True
 
             if can_actuate_ao1 and readings_ai1 <= MIN_READ_VALUE:
                 # Cannot actuate anymore in ai1
+                print "Cannot actuate anymore in ai1"
                 can_actuate_ao1 = False
                 # Send 0 to ao1
                 board.actuator.execute_task("ao1", 1, 0)
             elif (not can_actuate_ao1) and readings_ai1 >= MAX_READ_VALUE:
                 # Can actuate back in ai1
+                print "Can actuate back in ai1"
                 can_actuate_ao1 = True
         except Exception, e:
             print "Board is not connected!\n" + str(e)

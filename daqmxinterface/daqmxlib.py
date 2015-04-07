@@ -113,6 +113,7 @@ class Actuator():
         if not (isinstance(message, int) or isinstance(message, float)):
             raise TypeError("Wrong message type for the task to be executed in channel " + str(name) + ". Message should "
                             "be an interger or float between 0 and 5") 
+        message = float(message)
 
         # Message has to be a numpy array, so lets convert it to the desired data type
         message = numpy.array(message)
