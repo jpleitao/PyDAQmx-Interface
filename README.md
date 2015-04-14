@@ -37,3 +37,11 @@ If you want to run PyDAQmx without installing it, run the python setup.py build 
 ### Linux 
 
 * Not supported yet
+
+## Usage
+
+### Direct Interaction with DAQmxLib
+A reader and actuator examples are presented in the ```  daqmxinterface ```  directory of this repository. Please see ```  daqmxinterface/actuator_example.py ``` and  ```  daqmxinterface/reader_example.py ``` 
+
+### Remote Method Invocation with Pyro4
+A Pyro4 client application example is presented in the ```  daqmxinterface ```  directory of this repository. Please see ```  daqmxinterface/Client.py ```   
