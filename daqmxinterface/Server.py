@@ -13,7 +13,7 @@ import daqmxlib
 import utils
 
 TIMER_STEP = 1.0
-LIMIT_FAILS = 10
+LIMIT_FAILS = 20
 global MIN_READ_VALUE
 global MAX_READ_VALUE
 global can_actuate_ao0
@@ -39,7 +39,8 @@ def check_board(board):
             readings_ai0 = readings_ai0[0]
             readings_ai1 = readings_ai1[0]
 
-            print "Read " + str(readings_ai0) + " and " + str(readings_ai1)
+            print "Read " + str(readings_ai0) + " and " + str(readings_ai1) + " Current Number of Failures: " +\
+                  str(board.sensor_down_count)
 
             if can_actuate_ao0 and readings_ai0 <= MIN_READ_VALUE:
                 # Cannot actuate anymore in ai0
