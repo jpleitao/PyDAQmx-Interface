@@ -13,7 +13,7 @@ import daqmxlib
 import utils
 
 TIMER_STEP = 1.0
-LIMIT_FAILS = 20
+LIMIT_FAILS = 540
 global MIN_READ_VALUE
 global MAX_READ_VALUE
 global can_actuate_ao0

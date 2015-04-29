@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0857850f-8e22-4114-9d4b-c85a3afc4d33" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/daqmxinterface/Client.py" afterPath="$PROJECT_DIR$/daqmxinterface/Client.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/daqmxinterface/Server.py" afterPath="$PROJECT_DIR$/daqmxinterface/Server.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -27,7 +26,7 @@
     <SUITE FILE_PATH="coverage/PyDAQmx-Module$teste.coverage" NAME="teste Coverage Results" MODIFIED="1427216783000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
     <SUITE FILE_PATH="coverage/PyDAQmx-Module$CallbackTest.coverage" NAME="CallbackTest Coverage Results" MODIFIED="1427299420607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
     <SUITE FILE_PATH="coverage/PyDAQmx-Module$teste1.coverage" NAME="teste1 Coverage Results" MODIFIED="1427300410198" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
-    <SUITE FILE_PATH="coverage/PyDAQmx-Module$Server.coverage" NAME="Server Coverage Results" MODIFIED="1429095016052" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
+    <SUITE FILE_PATH="coverage/PyDAQmx-Module$Server.coverage" NAME="Server Coverage Results" MODIFIED="1430232613836" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
     <SUITE FILE_PATH="coverage/PyDAQmx-Module$reader_example.coverage" NAME="reader_example Coverage Results" MODIFIED="1427466563627" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/daqmxinterface" />
   </component>
   <component name="CreatePatchCommitExecutor">
@@ -55,8 +54,8 @@
       <file leaf-file-name="Server.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/daqmxinterface/Server.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.974359" vertical-offset="0" max-vertical-offset="2244">
-              <caret line="38" column="42" selection-start-line="38" selection-start-column="42" selection-end-line="38" selection-end-column="42" />
+            <state vertical-scroll-proportion="0.6163142" vertical-offset="0" max-vertical-offset="2244">
+              <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
                 <element signature="e#64#75#0" expanded="true" />
               </folding>
@@ -131,8 +130,8 @@
         <option value="$PROJECT_DIR$/daqmxinterface/daqmxlib.py" />
         <option value="$PROJECT_DIR$/daqmxinterface/utils.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/daqmxinterface/Server.py" />
         <option value="$PROJECT_DIR$/daqmxinterface/Client.py" />
+        <option value="$PROJECT_DIR$/daqmxinterface/Server.py" />
       </list>
     </option>
   </component>
@@ -471,8 +470,8 @@
     </list>
     <recent_temporary>
       <list size="2">
-        <item index="0" class="java.lang.String" itemvalue="Python.Client" />
-        <item index="1" class="java.lang.String" itemvalue="Python.Server" />
+        <item index="0" class="java.lang.String" itemvalue="Python.Server" />
+        <item index="1" class="java.lang.String" itemvalue="Python.Client" />
       </list>
     </recent_temporary>
   </component>
@@ -691,7 +690,13 @@
       <option name="project" value="LOCAL" />
       <updated>1429001423384</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Updated Client example and threshold in the server">
+      <created>1429628875175</created>
+      <option name="number" value="00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1429628875175</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -700,11 +705,12 @@
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3296" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32532752" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2167991" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3290735" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32603937" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21655329" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2167991" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1763754" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -712,7 +718,6 @@
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -759,7 +764,6 @@
     <option name="myTodoPanelSettings">
       <TodoPanelSettings />
     </option>
-    <MESSAGE value="Started working on the actuator class" />
     <MESSAGE value="First version of the Actuator Class finished" />
     <MESSAGE value="Major code refactoring. Details changed in both the implementations of the Reader and the Actuator and in their example scripts" />
     <MESSAGE value="Small change in one example" />
@@ -784,7 +788,8 @@
     <MESSAGE value="Bug correction for the previous commit" />
     <MESSAGE value="Updated .gitignore" />
     <MESSAGE value="More support for monitoring the board" />
-    <option name="LAST_COMMIT_MESSAGE" value="More support for monitoring the board" />
+    <MESSAGE value="Updated Client example and threshold in the server" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated Client example and threshold in the server" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1186,7 +1191,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1377">
           <caret line="7" column="17" selection-start-line="7" selection-start-column="17" selection-end-line="7" selection-end-column="17" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1219,8 +1224,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/daqmxinterface/Server.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.974359" vertical-offset="0" max-vertical-offset="2244">
-          <caret line="38" column="42" selection-start-line="38" selection-start-column="42" selection-end-line="38" selection-end-column="42" />
+        <state vertical-scroll-proportion="0.6163142" vertical-offset="0" max-vertical-offset="2244">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#64#75#0" expanded="true" />
           </folding>
