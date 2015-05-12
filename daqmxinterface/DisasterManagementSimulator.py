@@ -40,8 +40,8 @@ while current_position < number_events:
     current_value_ai0 = tanks["ai0"]
     current_value_ai2 = tanks["ai2"]
     if current_value_ai0 < current_target_ai0:
-        actuator.execute_task("ao0", 1, current_target_ai0 - current_value_ai0)
+        actuator.execute_task("ao0", 1, 0.005 * (current_target_ai0 - current_value_ai0))
     if current_value_ai2 < current_target_ai2:
-        actuator.execute_task("ao2", 1, current_target_ai2 - current_value_ai2)
+        actuator.execute_task("ao2", 1, 0.005 * (current_target_ai2 - current_value_ai2))
     # Sleep
     time.sleep(1 - current_time - timeit.default_timer())
