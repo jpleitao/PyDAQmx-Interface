@@ -17,6 +17,7 @@ board_interaction = Pyro4.Proxy(uri)
 while True:
     valor = raw_input("Insere o valor")
     board_interaction.execute_task("ao0", 1, float(valor))
+    board_interaction.execute_task("ao1", 1, float(valor))
 
 """
 # Generate the actuation signal

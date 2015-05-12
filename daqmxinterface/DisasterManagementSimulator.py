@@ -11,7 +11,8 @@ actuator = daqmxlib.Actuator(["ao0", "ao1"])
 reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1})
 
 # Time Series Data
-duration = 1800  # Seconds
+# duration = 1800  # Seconds
+duration = 300
 times = numpy.array([0, 0.43, 0.45, 0.58, 0.6, 0.73, 0.75, 0.88, 0.9, 1.0]) * duration
 # times = numpy.array([0, 774, 810, 1044, 1080, 1314, 1350, 1584, 1620, 1800])
 levels_tank0 = numpy.array([0.3, 0.3, 0.55, 0.55, 0.3, 0.3, 0.55, 0.55, 0.3, 0.3])
@@ -21,6 +22,9 @@ print(times)
 
 current_position = 0
 number_events = len(times)
+
+percentage_actuation = 1.0
+actuation = percentage_actuation * (daqmxlib.DAQMX_MAX_ACTUATION_V - daqmxlib.DAQMX_MIN_ACTUATION_V)
 
 start_time = timeit.default_timer()
 
@@ -39,19 +43,23 @@ while current_position < number_events:
 
     print "Elapsed Time: " + str(end_time) + " And position " + str(current_position)
 
-    # Read and actuate
-    tanks = reader.read_all(0.01, 1)
-    current_value_ai0 = tanks["ai0"]
-    current_value_ai2 = tanks["ai2"]
+    # Read and convert from volts to meters
+    tanks = reader.read_all()
+    current_value_ai0 = (0.6 / -16.7) * (tanks["ai0"][0] - 10)  # meters
+    current_value_ai1 = (0.6 / -16.7) * (tanks["ai1"][0] - 10)  # meters
 
-    if current_value_ai0 < current_target_ai0:
-        print "Actuating " + str(0.005 * (current_target_ai0 - current_value_ai0))
-        actuator.execute_task("ao0", 1, 0.005 * (current_target_ai0 - current_value_ai0))
-    if current_value_ai2 < current_target_ai2:
-        print "Actuating " + str(0.005 * (current_target_ai2 - current_value_ai2))
-        actuator.execute_task("ao2", 1, 0.005 * (current_target_ai2 - current_value_ai2))
+    print "Read " + str(current_value_ai0) + " and expected " + str(current_target_ai0)
+    print "Read " + str(current_value_ai1) + " and expected " + str(current_target_ai2)
+
+    result = actuator.execute_task("ao0", 1, 200 * (current_target_ai0 - current_value_ai0))
+    print "Actuated " + str(200 * (current_target_ai0 - current_value_ai0)) + " " + str(result)
+    result = actuator.execute_task("ao1", 1, 200 * (current_target_ai2 - current_value_ai1))
+    print "Actuated " + str(200 * (current_target_ai2 - current_value_ai1)) + " " + str(result)
 
     # Sleep
-    time_sleep = 1 - current_time - timeit.default_timer()
+    time_sleep = 5 - current_time - timeit.default_timer()
     if time_sleep > 0:
         time.sleep(time_sleep)
+
+actuator.execute_task("ao0", 1, 0)
+actuator.execute_task("ao1", 1, 0)
