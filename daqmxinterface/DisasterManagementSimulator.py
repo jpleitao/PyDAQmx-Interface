@@ -57,7 +57,8 @@ while current_position < number_events:
     print "Actuated " + str(200 * (current_target_ai2 - current_value_ai1)) + " " + str(result)
 
     # Sleep
-    time_sleep = 5 - current_time - timeit.default_timer()
+    time_sleep = 1 - (current_time - timeit.default_timer())
+    print time_sleep
     if time_sleep > 0:
         time.sleep(time_sleep)
 
