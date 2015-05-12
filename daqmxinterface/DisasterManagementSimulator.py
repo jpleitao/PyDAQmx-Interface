@@ -1,5 +1,5 @@
 # coding: utf-8
-__author__ = 'Joaquim Leitao'
+__author__ = 'Joaquim Leitão'
 
 # Imports to be used in the code
 import timeit
