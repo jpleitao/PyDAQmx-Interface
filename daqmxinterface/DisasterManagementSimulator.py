@@ -11,20 +11,19 @@ actuator = daqmxlib.Actuator(["ao0", "ao1"])
 reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1})
 
 # Time Series Data
-# duration = 1800  # Seconds
-duration = 300
+duration = 1800  # Seconds
+# duration = 300
 times = numpy.array([0, 0.43, 0.45, 0.58, 0.6, 0.73, 0.75, 0.88, 0.9, 1.0]) * duration
 # times = numpy.array([0, 774, 810, 1044, 1080, 1314, 1350, 1584, 1620, 1800])
-levels_tank0 = numpy.array([0.3, 0.3, 0.55, 0.55, 0.3, 0.3, 0.55, 0.55, 0.3, 0.3])
-levels_tank2 = numpy.array([0.25, 0.25, 0.45, 0.45, 0.25, 0.25, 0.45, 0.45, 0.25, 0.25])
+# levels_tank0 = numpy.array([0.3, 0.3, 0.55, 0.55, 0.3, 0.3, 0.55, 0.55, 0.3, 0.3])
+levels_tank0 = numpy.array([0.33, 0.33, 0.58, 0.58, 0.33, 0.33, 0.58, 0.58, 0.33, 0.33])
+# levels_tank2 = numpy.array([0.25, 0.25, 0.45, 0.45, 0.25, 0.25, 0.45, 0.45, 0.25, 0.25])
+levels_tank2 = numpy.array([0.28, 0.28, 0.48, 0.48, 0.28, 0.28, 0.48, 0.48, 0.28, 0.28])
 
 print(times)
 
 current_position = 0
 number_events = len(times)
-
-percentage_actuation = 1.0
-actuation = percentage_actuation * (daqmxlib.DAQMX_MAX_ACTUATION_V - daqmxlib.DAQMX_MIN_ACTUATION_V)
 
 start_time = timeit.default_timer()
 
@@ -51,10 +50,12 @@ while current_position < number_events:
     print "Read " + str(current_value_ai0) + " and expected " + str(current_target_ai0)
     print "Read " + str(current_value_ai1) + " and expected " + str(current_target_ai2)
 
-    result = actuator.execute_task("ao0", 1, 200 * (current_target_ai0 - current_value_ai0))
-    print "Actuated " + str(200 * (current_target_ai0 - current_value_ai0)) + " " + str(result)
-    result = actuator.execute_task("ao1", 1, 200 * (current_target_ai2 - current_value_ai1))
-    print "Actuated " + str(200 * (current_target_ai2 - current_value_ai1)) + " " + str(result)
+    actuation = 40 * (current_target_ai0 - current_value_ai0)
+    result = actuator.execute_task("ao0", 1, actuation)
+    print "Actuated " + str(actuation) + " " + str(result)
+    actuation = 40 * (current_target_ai2 - current_value_ai1)
+    result = actuator.execute_task("ao1", 1, actuation)
+    print "Actuated " + str(actuation) + " " + str(result)
 
     # Sleep
     time_sleep = 1 - (current_time - timeit.default_timer())
