@@ -16,9 +16,9 @@ duration = 1800  # Seconds
 times = numpy.array([0, 0.43, 0.45, 0.58, 0.6, 0.73, 0.75, 0.88, 0.9, 1.0]) * duration
 # times = numpy.array([0, 774, 810, 1044, 1080, 1314, 1350, 1584, 1620, 1800])
 # levels_tank0 = numpy.array([0.3, 0.3, 0.55, 0.55, 0.3, 0.3, 0.55, 0.55, 0.3, 0.3])
-levels_tank0 = numpy.array([0.33, 0.33, 0.58, 0.58, 0.33, 0.33, 0.58, 0.58, 0.33, 0.33])
+levels_tank0 = numpy.array([0.35, 0.35, 0.55, 0.55, 0.35, 0.35, 0.55, 0.55, 0.35, 0.35])
 # levels_tank2 = numpy.array([0.25, 0.25, 0.45, 0.45, 0.25, 0.25, 0.45, 0.45, 0.25, 0.25])
-levels_tank2 = numpy.array([0.28, 0.28, 0.48, 0.48, 0.28, 0.28, 0.48, 0.48, 0.28, 0.28])
+levels_tank2 = numpy.array([0.3, 0.3, 0.5, 0.5, 0.3, 0.3, 0.5, 0.5, 0.3, 0.3])
 
 print(times)
 
@@ -53,13 +53,12 @@ while current_position < number_events:
     actuation = 40 * (current_target_ai0 - current_value_ai0)
     result = actuator.execute_task("ao0", 1, actuation)
     print "Actuated " + str(actuation) + " " + str(result)
-    actuation = 40 * (current_target_ai2 - current_value_ai1)
+    actuation = 30 * (current_target_ai2 - current_value_ai1)
     result = actuator.execute_task("ao1", 1, actuation)
     print "Actuated " + str(actuation) + " " + str(result)
 
     # Sleep
     time_sleep = 1 - (current_time - timeit.default_timer())
-    print time_sleep
     if time_sleep > 0:
         time.sleep(time_sleep)
 
