@@ -54,7 +54,7 @@ class Actuator():
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAOVoltageChan("Dev1/" + str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
+            task.CreateAOVoltageChan("dev2/" + str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
                                      VAL_VOLTS, None)  # Create Voltage Channel
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
@@ -167,7 +167,7 @@ class Reader():
             # Create the tasks, one to read in each channel
             task = PyDAQmx.Task()
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
+            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -225,7 +225,7 @@ class Reader():
         elif channel in self.physical_channels:
             # Create a new task for the given channel that is going to
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -265,7 +265,7 @@ class Reader():
             self.n_samples.append(current_samples)
             # Create a task and the voltage channel and store it
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan("Dev1/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0

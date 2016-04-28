@@ -1,4 +1,6 @@
 # coding: utf-8
+from datetime import datetime
+
 __author__ = 'Joaquim Leitão'
 
 # System imports
@@ -7,6 +9,7 @@ import traceback
 import sys
 import threading
 import Pyro4
+import PID
 
 # Import daqmxlib and other private libraries
 import daqmxlib
@@ -39,7 +42,7 @@ def check_board(board):
             readings_ai0 = readings_ai0[0]
             readings_ai1 = readings_ai1[0]
 
-            print "Read " + str(readings_ai0) + " and " + str(readings_ai1) + " Current Number of Failures: " +\
+            print "Read " + str(readings_ai0) + " and " + str(readings_ai1) + " Current Number of Failures: " + \
                   str(board.sensor_down_count)
 
             if can_actuate_ao0 and readings_ai0 <= MIN_READ_VALUE:
@@ -90,6 +93,7 @@ class BoardInteraction(object):
         self.actuator = daqmxlib.Actuator(["ao0", "ao1"])
         self.reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1, "ai3": 1, "ai4": 1, "ai5": 1, "ai6": 1, "ai7": 1})
         self.sensor_down_count = 0
+        self.controller_thread = None
 
     def execute_task(self, name, num_samps_channel, message, auto_start=1, timeout=0):
         # Check if we can actuate in the given channel
@@ -99,6 +103,42 @@ class BoardInteraction(object):
             return False
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
+
+    def PID_controller_input(self, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
+        output = {}
+        if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
+            "status"]:
+            self.controller_thread = PID.ControllerThread(daqmxlib.Reader({"ai0": 1}), daqmxlib.Actuator(["ao0"]), P=P,
+                                                          I=I, D=D, SETPOINT=SETPOINT,
+                                                          FS=FS, SAMPLES=SAMPLES)
+            self.controller_thread.start()
+
+            output["completed"] = self.controller_thread.completed
+            output["controller"] = self.controller_thread.type
+            output["success"] = True
+        else:
+            output["message"] = "Controller is still running."
+            output["success"] = False
+
+        output["timestamp"] = str(datetime.now())
+        return output
+
+    def controller_output(self):
+        if self.controller_thread is None:
+            return {"success": False, "timestamp": str(datetime.now()), "message": "No controller is running."}
+        elif self.controller_thread.failed["status"]:
+            return {"success": False, "timestamp": str(datetime.now()),
+                    "failed": self.controller_thread.failed["status"],
+                    "reason": self.controller_thread.failed["reason"]}
+        else:
+            return {"success": True, "completed": self.controller_thread.completed, "failed": False,
+                    "timestamp": str(datetime.now()),
+                    "input": self.controller_thread.feedback_list,
+                    "output": self.controller_thread.output_list, "time_list": self.controller_thread.time_list,
+                    "setpoint_list": self.controller_thread.setpoint_list,
+                    "fs": self.controller_thread.FS,
+                    "setpoint": self.controller_thread.SETPOINT,
+                    "samples": self.controller_thread.SAMPLES}
 
     def read_all(self, timeout=0.01, num_samples=None):
         return self.reader.read_all(timeout, num_samples)
@@ -116,8 +156,8 @@ uri = daemon.register(board_interaction, '/NIBoard')
 
 print "Going to create thread"
 
-thread = threading.Thread(target=check_board, args=(board_interaction, ))
-thread.start()
+# thread = threading.Thread(target=check_board, args=(board_interaction,))
+# thread.start()
 
 # Print the uri so we can use it in the client later
 print "Ready. Object uri =", uri
