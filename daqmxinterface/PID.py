@@ -82,7 +82,7 @@ class PID:
 
         """
         error = self.SetPoint - feedback_value
-        print self.SetPoint, feedback_value, error
+        # print self.SetPoint, feedback_value, error
 
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
@@ -154,6 +154,8 @@ class ControllerThread(threading.Thread):
         self.feedback_smooth = []
         self.reader = reader
         self.controller = controller
+        self.controller.execute_task("ao0", 1, 0)
+        time.sleep(1)
         self.SETPOINT = SETPOINT
         self.completed = False
         self.failed = {"status": False, "reason": ""}
@@ -167,12 +169,12 @@ class ControllerThread(threading.Thread):
 
         END = self.SAMPLES
 
-        for i in range(1, END):
+        for i in range(1, int(END)):
             tic = datetime.now()
             feedback = self.reader.read_all()["ai0"][0]
             if feedback < 0:
                 feedback = 0
-            print "Feedback: ", feedback
+            # print "Feedback: ", feedback
             pid.update(feedback)
             u = pid.output
             # print "Output: ", u
@@ -183,7 +185,7 @@ class ControllerThread(threading.Thread):
 
             duration = (datetime.now() - tic).total_seconds()
             remaining = self.FS - duration
-            print str(i) + " " + str(duration) + " " + str(remaining) + " " + str(remaining + duration), feedback, u
+            # print str(i) + " " + str(duration) + " " + str(remaining) + " " + str(remaining + duration), feedback, u
             if remaining < 0:
                 self.failed["status"] = True
                 self.failed["reason"] = "Sampling frequency is too big."

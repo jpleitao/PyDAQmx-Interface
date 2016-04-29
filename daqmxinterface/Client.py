@@ -14,7 +14,8 @@ name = "NIBoard"
 uri = "PYRO:/" + name + "@localhost:" + str(port)
 
 # Get a Pyro4 proxy to the greeting object
-board_interaction = Pyro4.Proxy(uri)
+# board_interaction = Pyro4.Proxy(uri)
+board_interaction = Pyro4.Proxy("PYRO:/NIBoard@hydra.dei.uc.pt/remotept326/", port=80)
 
 """while True:
     valor = raw_input("Insere o valor")
@@ -42,18 +43,23 @@ print board_interaction.read_all(num_samples={"ai0": 3, "ai1": 3, "ai2": 3, "ai3
                                               "ai6": 3, "ai7": 3})
 """
 
-# print board_interaction.PID_controller_input(2, 1, 0, 5, 0.05, 1000)
+# print board_interaction.PID_controller_input(1, 1, 0, 5, 0.1, 1000)
 output = board_interaction.controller_output()
-if output["success"] and output["completed"]:
-        plt.plot(output["time_list"], output["input"])
-        plt.plot(output["time_list"], output["output"])
-        plt.plot(output["time_list"], output["setpoint_list"])
-        plt.xlim((0, output["samples"]))
-        plt.ylim(-10, 10)
-        # plt.ylim((min(controller_thread.feedback_list) - 0.5, max(controller_thread.feedback_list) + 0.5))
-        plt.xlabel('time (s)')
-        plt.ylabel('PID (PV)')
-        plt.title('TEST PID')
+if output["success"] and output["failed"]:
+    print "[Experiment Failed]", output["reason"]
+else:
+    print output["message"]
 
-        plt.grid(True)
-        plt.show()
+if output["success"] and len(output["time_list"]) > 10:
+    plt.plot(output["time_list"], output["input"])
+    plt.plot(output["time_list"], output["output"])
+    plt.plot(output["time_list"], output["setpoint_list"])
+    plt.xlim((0, output["samples"]))
+    plt.ylim(-10, 10)
+    # plt.ylim((min(controller_thread.feedback_list) - 0.5, max(controller_thread.feedback_list) + 0.5))
+    plt.xlabel('time (s)')
+    plt.ylabel('PID (PV)')
+    plt.title('TEST PID')
+
+    plt.grid(True)
+    plt.show()

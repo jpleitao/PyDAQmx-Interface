@@ -116,6 +116,7 @@ class BoardInteraction(object):
             output["completed"] = self.controller_thread.completed
             output["controller"] = self.controller_thread.type
             output["success"] = True
+            output["message"] = "Actuated successfully."
         else:
             output["message"] = "Controller is still running."
             output["success"] = False
@@ -127,18 +128,30 @@ class BoardInteraction(object):
         if self.controller_thread is None:
             return {"success": False, "timestamp": str(datetime.now()), "message": "No controller is running."}
         elif self.controller_thread.failed["status"]:
-            return {"success": False, "timestamp": str(datetime.now()),
-                    "failed": self.controller_thread.failed["status"],
-                    "reason": self.controller_thread.failed["reason"]}
+            output = {"success": False,
+                      "timestamp": str(datetime.now()),
+                      "failed": True,
+                      "reason": self.controller_thread.failed["reason"]}
         else:
-            return {"success": True, "completed": self.controller_thread.completed, "failed": False,
-                    "timestamp": str(datetime.now()),
-                    "input": self.controller_thread.feedback_list,
-                    "output": self.controller_thread.output_list, "time_list": self.controller_thread.time_list,
-                    "setpoint_list": self.controller_thread.setpoint_list,
-                    "fs": self.controller_thread.FS,
-                    "setpoint": self.controller_thread.SETPOINT,
-                    "samples": self.controller_thread.SAMPLES}
+            output = {"success": True,
+                      "timestamp": str(datetime.now()),
+                      "failed": False}
+
+        if self.controller_thread.completed:
+            output["message"] = "The experiment has ended."
+        else:
+            output["message"] = "The controller is running."
+
+        output["completed"] = self.controller_thread.completed
+        output["input"] = self.controller_thread.feedback_list
+        output["output"] = self.controller_thread.output_list
+        output["time_list"] = self.controller_thread.time_list
+        output["setpoint_list"] = self.controller_thread.setpoint_list
+        output["fs"] = self.controller_thread.FS
+        output["setpoint"] = self.controller_thread.SETPOINT
+        output["samples"] = self.controller_thread.SAMPLES
+
+        return output
 
     def read_all(self, timeout=0.01, num_samples=None):
         return self.reader.read_all(timeout, num_samples)
