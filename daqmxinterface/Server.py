@@ -104,11 +104,11 @@ class BoardInteraction(object):
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
-    def PID_controller_input(self, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
+    def PID_controller_input(self, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
         output = {}
         if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
             "status"]:
-            self.controller_thread = PID.ControllerThread(daqmxlib.Reader({"ai0": 1}), daqmxlib.Actuator(["ao0"]), P=P,
+            self.controller_thread = PID.ControllerThread(daqmxlib.Reader({"ai0": 1}), daqmxlib.Actuator(["ao0"]), user, P=P,
                                                           I=I, D=D, SETPOINT=SETPOINT,
                                                           FS=FS, SAMPLES=SAMPLES)
             self.controller_thread.start()
@@ -117,16 +117,21 @@ class BoardInteraction(object):
             output["controller"] = self.controller_thread.type
             output["success"] = True
             output["message"] = "Actuated successfully."
+            output["status"] = 200
         else:
             output["message"] = "Controller is still running."
             output["success"] = False
+            output["status"] = 200
 
         output["timestamp"] = str(datetime.now())
         return output
 
-    def controller_output(self):
+    def controller_output(self, user):
+        if user != self.controller_thread.user:
+            return {"success": False, "timestamp": str(datetime.now()), "status":404, "message": "No controller is running."}
+
         if self.controller_thread is None:
-            return {"success": False, "timestamp": str(datetime.now()), "message": "No controller is running."}
+            return {"success": False, "timestamp": str(datetime.now()), "status":404, "message": "No controller is running."}
         elif self.controller_thread.failed["status"]:
             output = {"success": False,
                       "timestamp": str(datetime.now()),
@@ -139,8 +144,10 @@ class BoardInteraction(object):
 
         if self.controller_thread.completed:
             output["message"] = "The experiment has ended."
+            output["status"] = 200
         else:
             output["message"] = "The controller is running."
+            output["status"] = 200
 
         output["completed"] = self.controller_thread.completed
         output["input"] = self.controller_thread.feedback_list
@@ -150,6 +157,9 @@ class BoardInteraction(object):
         output["fs"] = self.controller_thread.FS
         output["setpoint"] = self.controller_thread.SETPOINT
         output["samples"] = self.controller_thread.SAMPLES
+        output["P"] = self.controller_thread.P
+        output["I"] = self.controller_thread.I
+        output["D"] = self.controller_thread.D
 
         return output
 

@@ -139,7 +139,7 @@ class PID:
 
 
 class ControllerThread(threading.Thread):
-    def __init__(self, reader, controller, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
+    def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
         threading.Thread.__init__(self)
         self.feedback_list = []
         self.setpoint_list = []
@@ -160,6 +160,7 @@ class ControllerThread(threading.Thread):
         self.completed = False
         self.failed = {"status": False, "reason": ""}
         self.type = "PID"
+        self.user = user
 
     def run(self):
         pid = PID(self.P, self.I, self.D)
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     my_actuator = daqmxlib.Actuator(["ao0"])
     my_actuator.execute_task("ao0", 1, 0)
     time.sleep(1)
-    controller_thread = ControllerThread(my_reader, my_actuator, P=2, I=1, D=0, SETPOINT=3, FS=0.05, SAMPLES=SAMPLES)
+    controller_thread = ControllerThread(my_reader, my_actuator, "", P=2, I=1, D=0, SETPOINT=3, FS=0.05, SAMPLES=SAMPLES)
     controller_thread.start()
     controller_thread.join()
     # print controller_thread.feedback_smooth
