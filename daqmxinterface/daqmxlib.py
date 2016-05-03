@@ -29,11 +29,12 @@ class Actuator():
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, physical_channels=["ao0"]):
+    def __init__(self, physical_channels=["ao0"], device = "dev2"):
         """
         Class Constructor
         :param physical_channels: A list of physical channels used to acquire the data
         """
+        self.device = device
         # Check for argument's type
         if not isinstance(physical_channels, list) and not isinstance(physical_channels, str):
             raise TypeError("Wrong type for argument channels_samples: Expected <class 'dict'> or <class 'str'> "
@@ -54,7 +55,7 @@ class Actuator():
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAOVoltageChan("dev2/" + str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
+            task.CreateAOVoltageChan(self.device +'/'+ str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
                                      VAL_VOLTS, None)  # Create Voltage Channel
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
@@ -140,7 +141,7 @@ class Reader():
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, channels_samples={"ai1": 1}):
+    def __init__(self, channels_samples={"ai1": 1}, device = "dev2"):
         """
         Class Constructor
         :param channels_samples: A dictionary with a mapping between the physical channels used to acquire the data and
@@ -154,7 +155,8 @@ class Reader():
         # Get the set of physical channels from which we are going to extract the data and do the same for the names of
         # the channels
         self.physical_channels = self.__parse(channels_samples)
-        self.n_samples = []            
+        self.n_samples = []
+        self.device = device
 
         tasks = []
         for channel in self.physical_channels:
@@ -167,7 +169,7 @@ class Reader():
             # Create the tasks, one to read in each channel
             task = PyDAQmx.Task()
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
+            task.CreateAIVoltageChan(self.device +'/' + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -225,7 +227,7 @@ class Reader():
         elif channel in self.physical_channels:
             # Create a new task for the given channel that is going to
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan(self.device +'/'+ str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -265,7 +267,7 @@ class Reader():
             self.n_samples.append(current_samples)
             # Create a task and the voltage channel and store it
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan("dev2/" + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan(self.device +'/'+ str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0

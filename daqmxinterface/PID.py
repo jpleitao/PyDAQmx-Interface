@@ -126,7 +126,7 @@ class PID:
         and the integral terms accumulates a significant error
         during the rise (windup), thus overshooting and continuing
         to increase as this accumulated error is unwound
-        (offset by errors in the other direction).
+        (ofTSet by errors in the other direction).
         The specific problem is the excess overshooting.
         """
         self.windup_guard = windup
@@ -139,7 +139,7 @@ class PID:
 
 
 class ControllerThread(threading.Thread):
-    def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
+    def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=[], TS=0.05, SAMPLES=100, WAVETYPE = {}):
         threading.Thread.__init__(self)
         self.feedback_list = []
         self.setpoint_list = []
@@ -150,68 +150,89 @@ class ControllerThread(threading.Thread):
         self.I = I
         self.D = D
         self.SAMPLES = SAMPLES
-        self.FS = FS
+        self.TS = TS
         self.feedback_smooth = []
         self.reader = reader
         self.controller = controller
         self.controller.execute_task("ao0", 1, 0)
+        self.WAVETYPE = WAVETYPE
         time.sleep(1)
         self.SETPOINT = SETPOINT
         self.completed = False
         self.failed = {"status": False, "reason": ""}
         self.type = "PID"
         self.user = user
+        self.abort = False
+        self.flip = 1
 
     def run(self):
-        pid = PID(self.P, self.I, self.D)
+        try:
+            pid = PID(self.P, self.I, self.D)
 
-        pid.SetPoint = 0.0
-        pid.setSampleTime(self.FS)
+            pid.SetPoint = 0.0
+            pid.setSampleTime(self.TS)
 
-        END = self.SAMPLES
+            END = self.SAMPLES
 
-        for i in range(1, int(END)):
-            tic = datetime.now()
-            feedback = self.reader.read_all()["ai0"][0]
-            if feedback < 0:
-                feedback = 0
-            # print "Feedback: ", feedback
-            pid.update(feedback)
-            u = pid.output
-            # print "Output: ", u
-            self.controller.execute_task("ao0", 1, u)
+            for i in range(1, int(END)):
+                tic = datetime.now()
+                feedback = self.reader.read_all()["ai0"][0] * self.flip
+                if feedback < 0:
+                    feedback = 0
+                # print "Feedback: ", feedback
+                pid.update(feedback)
+                u = pid.output
+                # print "Output: ", u
+                if u > 5:
+                    u = 5
+                elif u < 0:
+                    u = 0
 
-            if i > 9:
-                pid.SetPoint = self.SETPOINT
+                self.controller.execute_task("ao0", 1, u)
 
-            duration = (datetime.now() - tic).total_seconds()
-            remaining = self.FS - duration
-            # print str(i) + " " + str(duration) + " " + str(remaining) + " " + str(remaining + duration), feedback, u
-            if remaining < 0:
-                self.failed["status"] = True
-                self.failed["reason"] = "Sampling frequency is too big."
-                exit(1)
-            time.sleep(remaining)
+                if i > 9:
+                    try:
+                        pid.SetPoint = self.SETPOINT[i]
+                    except Exception:
+                        pid.SetPoint = 0
 
-            self.feedback_list.append(feedback)
-            self.output_list.append(u)
-            self.setpoint_list.append(pid.SetPoint)
-            self.time_list.append(i)
+                duration = (datetime.now() - tic).total_seconds()
+                remaining = self.TS - duration
+                # print str(i) + " " + str(duration) + " " + str(remaining) + " " + str(remaining + duration), feedback, u
+                if remaining < 0:
+                    self.failed["status"] = True
+                    self.failed["reason"] = "Sampling frequency is too big."
+                    exit(1)
 
-        self.time_sm = np.array(self.time_list)
-        self.time_smooth = np.linspace(self.time_sm.min(), self.time_sm.max(), 300)
-        self.feedback_smooth = spline(self.time_list, self.feedback_list, self.time_smooth)
-        self.output_smooth = spline(self.time_list, self.output_list, self.time_smooth)
-        self.completed = True
+                if self.abort:
+                    self.failed["status"] = True
+                    self.failed["reason"] = "Aborted by user."
+                    exit(1)
+                time.sleep(remaining)
+
+                self.feedback_list.append(feedback)
+                self.output_list.append(u)
+                self.setpoint_list.append(pid.SetPoint)
+                self.time_list.append(i)
+
+            """         self.time_sm = np.array(self.time_list)
+            self.time_smooth = np.linspace(self.time_sm.min(), self.time_sm.max(), 300)
+            self.feedback_smooth = spline(self.time_list, self.feedback_list, self.time_smooth)
+            self.output_smooth = spline(self.time_list, self.output_list, self.time_smooth)"""
+            self.completed = True
+        except Exception, msg:
+            self.failed["status"] = True
+            self.failed["reason"] = msg
 
 
-if __name__ == "__main__":
+"""if __name__ == "__main__":
     SAMPLES = 10
     my_reader = daqmxlib.Reader({"ai0": 1})
     my_actuator = daqmxlib.Actuator(["ao0"])
     my_actuator.execute_task("ao0", 1, 0)
     time.sleep(1)
-    controller_thread = ControllerThread(my_reader, my_actuator, "", P=2, I=1, D=0, SETPOINT=3, FS=0.05, SAMPLES=SAMPLES)
+    controller_thread = ControllerThread(my_reader, my_actuator, "", P=2, I=1, D=0, SETPOINT=3, TS=0.05,
+                                         SAMPLES=SAMPLES)
     controller_thread.start()
     controller_thread.join()
     # print controller_thread.feedback_smooth
@@ -228,4 +249,4 @@ if __name__ == "__main__":
         plt.title('TEST PID')
 
         plt.grid(True)
-        plt.show()
+        plt.show()"""

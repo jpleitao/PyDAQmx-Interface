@@ -1,4 +1,5 @@
 # coding: utf-8
+import argparse
 from datetime import datetime
 
 __author__ = 'Joaquim Leitão'
@@ -85,13 +86,15 @@ def check_board(board):
 
 
 class BoardInteraction(object):
-    def __init__(self):
+    def __init__(self, device="dev2"):
         """
         Class constrcutor
         """
+        self.device = device
         # Create the actuator and the reader with all the channels
-        self.actuator = daqmxlib.Actuator(["ao0", "ao1"])
-        self.reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1, "ai3": 1, "ai4": 1, "ai5": 1, "ai6": 1, "ai7": 1})
+        self.actuator = daqmxlib.Actuator(["ao0", "ao1"], device=self.device)
+        self.reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1, "ai3": 1, "ai4": 1, "ai5": 1, "ai6": 1, "ai7": 1},
+                                      device=self.device)
         self.sensor_down_count = 0
         self.controller_thread = None
 
@@ -104,13 +107,15 @@ class BoardInteraction(object):
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
-    def PID_controller_input(self, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, FS=0.05, SAMPLES=100):
+    def PID_controller_input(self, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, TS=0.05, SAMPLES=100, WAVETYPE={}):
         output = {}
         if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
             "status"]:
-            self.controller_thread = PID.ControllerThread(daqmxlib.Reader({"ai0": 1}), daqmxlib.Actuator(["ao0"]), user, P=P,
+            self.controller_thread = PID.ControllerThread(daqmxlib.Reader({"ai0": 1}, device=self.device),
+                                                          daqmxlib.Actuator(["ao0"], device=self.device), user,
+                                                          P=P,
                                                           I=I, D=D, SETPOINT=SETPOINT,
-                                                          FS=FS, SAMPLES=SAMPLES)
+                                                          TS=TS, SAMPLES=SAMPLES, WAVETYPE=WAVETYPE)
             self.controller_thread.start()
 
             output["completed"] = self.controller_thread.completed
@@ -126,42 +131,54 @@ class BoardInteraction(object):
         output["timestamp"] = str(datetime.now())
         return output
 
+    def controller_stop(self, user):
+        if self.controller_thread is None or user != self.controller_thread.user:
+            return {"success": False, "failed": True, "timestamp": str(datetime.now()), "status": 404,
+                    "reason": "No controller is running.", "message": "No controller is running."}
+        self.controller_thread.abort = True
+        self.controller_thread.join()
+
+        return {"success": True, "timestamp": str(datetime.now()), "status": 200}
+
     def controller_output(self, user):
-        if user != self.controller_thread.user:
-            return {"success": False, "timestamp": str(datetime.now()), "status":404, "message": "No controller is running."}
+        try:
+            if self.controller_thread is None or user != self.controller_thread.user:
+                return {"success": False, "failed": True, "timestamp": str(datetime.now()), "status": 404,
+                        "reason": "No controller is running.", "message": "No controller is running."}
 
-        if self.controller_thread is None:
-            return {"success": False, "timestamp": str(datetime.now()), "status":404, "message": "No controller is running."}
-        elif self.controller_thread.failed["status"]:
-            output = {"success": False,
-                      "timestamp": str(datetime.now()),
-                      "failed": True,
-                      "reason": self.controller_thread.failed["reason"]}
-        else:
-            output = {"success": True,
-                      "timestamp": str(datetime.now()),
-                      "failed": False}
+            if self.controller_thread.failed["status"]:
+                output = {"success": False,
+                          "timestamp": str(datetime.now()),
+                          "failed": True,
+                          "reason": self.controller_thread.failed["reason"]}
+            else:
+                output = {"success": True,
+                          "timestamp": str(datetime.now()),
+                          "failed": False}
 
-        if self.controller_thread.completed:
-            output["message"] = "The experiment has ended."
-            output["status"] = 200
-        else:
-            output["message"] = "The controller is running."
-            output["status"] = 200
+            if self.controller_thread.completed:
+                output["message"] = "The experiment has ended."
+                output["status"] = 200
+            else:
+                output["message"] = "The controller is running."
+                output["status"] = 200
 
-        output["completed"] = self.controller_thread.completed
-        output["input"] = self.controller_thread.feedback_list
-        output["output"] = self.controller_thread.output_list
-        output["time_list"] = self.controller_thread.time_list
-        output["setpoint_list"] = self.controller_thread.setpoint_list
-        output["fs"] = self.controller_thread.FS
-        output["setpoint"] = self.controller_thread.SETPOINT
-        output["samples"] = self.controller_thread.SAMPLES
-        output["P"] = self.controller_thread.P
-        output["I"] = self.controller_thread.I
-        output["D"] = self.controller_thread.D
+            output["completed"] = self.controller_thread.completed
+            output["input"] = self.controller_thread.feedback_list
+            output["output"] = self.controller_thread.output_list
+            output["time_list"] = self.controller_thread.time_list
+            output["setpoint_list"] = self.controller_thread.setpoint_list
+            output["ts"] = self.controller_thread.TS
+            output["setpoint"] = self.controller_thread.SETPOINT
+            output["samples"] = self.controller_thread.SAMPLES
+            output["P"] = self.controller_thread.P
+            output["I"] = self.controller_thread.I
+            output["D"] = self.controller_thread.D
+            output["WAVETYPE"] = self.controller_thread.WAVETYPE
 
-        return output
+            return output
+        except Exception:
+            traceback.print_exc()
 
     def read_all(self, timeout=0.01, num_samples=None):
         return self.reader.read_all(timeout, num_samples)
@@ -170,20 +187,25 @@ class BoardInteraction(object):
         return self.reader.change_collected_samples(physical_channel, number_samples)
 
 
-board_interaction = BoardInteraction()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--device', help="Device identification.", default="dev2")
+    parser.add_argument('--port', help="Device identification.", default="6000")
+    args = parser.parse_args()
+    board_interaction = BoardInteraction(device = args.device)
 
-# Make a Pyro4 daemon
-daemon = Pyro4.Daemon(host='0.0.0.0', port=6000)
-# Register the greeting object as a Pyro4 object
-uri = daemon.register(board_interaction, '/NIBoard')
+    # Make a Pyro4 daemon
+    daemon = Pyro4.Daemon(host='0.0.0.0', port=int(args.port))
+    # Register the greeting object as a Pyro4 object
+    uri = daemon.register(board_interaction, 'NIBoard_'+args.device)
 
-print "Going to create thread"
+    print "Going to create thread"
 
-# thread = threading.Thread(target=check_board, args=(board_interaction,))
-# thread.start()
+    # thread = threading.Thread(target=check_board, args=(board_interaction,))
+    # thread.start()
 
-# Print the uri so we can use it in the client later
-print "Ready. Object uri =", uri
+    # Print the uri so we can use it in the client later
+    print "Ready. Object uri =", uri
 
-# Start the event loop of the server to wait for calls
-daemon.requestLoop()
+    # Start the event loop of the server to wait for calls
+    daemon.requestLoop()
