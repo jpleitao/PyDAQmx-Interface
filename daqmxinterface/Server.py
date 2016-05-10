@@ -1,6 +1,7 @@
 # coding: utf-8
 import argparse
 from datetime import datetime
+from daqmxinterface import SFC
 
 __author__ = 'Joaquim Leitão'
 
@@ -107,6 +108,25 @@ class BoardInteraction(object):
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
+    def SFC_controller_input(self, user):
+        output = {}
+        if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
+            "status"]:
+            self.controller_thread = SFC.ControllerThread()
+
+            output["completed"] = self.controller_thread.completed
+            output["controller"] = self.controller_thread.type
+            output["success"] = True
+            output["message"] = "Actuated successfully."
+            output["status"] = 200
+        else:
+            output["message"] = "Controller is still running."
+            output["success"] = False
+            output["status"] = 200
+
+        output["timestamp"] = str(datetime.now())
+        return output
+
     def PID_controller_input(self, user, P=0.2, I=0.0, D=0.0, SETPOINT=1.0, TS=0.05, SAMPLES=100, WAVETYPE={}):
         output = {}
         if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
@@ -156,6 +176,7 @@ class BoardInteraction(object):
                           "timestamp": str(datetime.now()),
                           "failed": False}
 
+            output["completed"] = self.controller_thread.completed
             if self.controller_thread.completed:
                 output["message"] = "The experiment has ended."
                 output["status"] = 200
@@ -163,22 +184,7 @@ class BoardInteraction(object):
                 output["message"] = "The controller is running."
                 output["status"] = 200
 
-            output["completed"] = self.controller_thread.completed
-            output["input"] = self.controller_thread.feedback_list
-            output["output"] = self.controller_thread.output_list
-            output["time_list"] = self.controller_thread.time_list
-            output["setpoint_list"] = self.controller_thread.setpoint_list
-            output["ts"] = self.controller_thread.TS
-            output["setpoint"] = self.controller_thread.SETPOINT
-            output["samples"] = self.controller_thread.SAMPLES
-            output["P"] = self.controller_thread.P
-            output["I"] = self.controller_thread.I
-            output["D"] = self.controller_thread.D
-            output["WAVETYPE"] = self.controller_thread.WAVETYPE
-            output["input_device"] = self.controller_thread.input
-            output["output_device"] = self.controller_thread.output
-
-            return output
+            return dict(output.items() + self.controller_thread.output())
         except Exception:
             traceback.print_exc()
 
@@ -194,12 +200,12 @@ if __name__ == '__main__':
     parser.add_argument('--device', help="Device identification.", default="dev2")
     parser.add_argument('--port', help="Device identification.", default="6000")
     args = parser.parse_args()
-    board_interaction = BoardInteraction(device = args.device)
+    board_interaction = BoardInteraction(device=args.device)
 
     # Make a Pyro4 daemon
     daemon = Pyro4.Daemon(host='0.0.0.0', port=int(args.port))
     # Register the greeting object as a Pyro4 object
-    uri = daemon.register(board_interaction, 'NIBoard_'+args.device)
+    uri = daemon.register(board_interaction, 'NIBoard_' + args.device)
 
     print "Going to create thread"
 

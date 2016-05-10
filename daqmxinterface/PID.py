@@ -138,6 +138,7 @@ class PID:
         self.sample_time = sample_time
 
 
+
 class ControllerThread(threading.Thread):
     def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=[], TS=0.05, SAMPLES=100, WAVETYPE = {}, INPUT = "ai0", OUTPUT="ao0"):
         threading.Thread.__init__(self)
@@ -166,6 +167,12 @@ class ControllerThread(threading.Thread):
         self.user = user
         self.abort = False
         self.flip = -1
+
+    def output(self):
+        return {"input": self.feedback_list, "output": self.output_list, "time_list": self.time_list,
+                  "setpoint_list": self.setpoint_list, "ts": self.TS, "setpoint": self.SETPOINT,
+                  "samples": self.SAMPLES, "P": self.P, "I": self.I, "D": self.D, "WAVETYPE": self.WAVETYPE,
+                  "input_device": self.input, "output_device": self.output}
 
     def run(self):
         try:
