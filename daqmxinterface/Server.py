@@ -175,6 +175,8 @@ class BoardInteraction(object):
             output["I"] = self.controller_thread.I
             output["D"] = self.controller_thread.D
             output["WAVETYPE"] = self.controller_thread.WAVETYPE
+            output["input_device"] = self.controller_thread.input
+            output["output_device"] = self.controller_thread.output
 
             return output
         except Exception:

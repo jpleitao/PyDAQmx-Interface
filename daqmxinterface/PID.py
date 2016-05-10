@@ -139,7 +139,7 @@ class PID:
 
 
 class ControllerThread(threading.Thread):
-    def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=[], TS=0.05, SAMPLES=100, WAVETYPE = {}):
+    def __init__(self, reader, controller, user, P=0.2, I=0.0, D=0.0, SETPOINT=[], TS=0.05, SAMPLES=100, WAVETYPE = {}, INPUT = "ai0", OUTPUT="ao0"):
         threading.Thread.__init__(self)
         self.feedback_list = []
         self.setpoint_list = []
@@ -154,7 +154,9 @@ class ControllerThread(threading.Thread):
         self.feedback_smooth = []
         self.reader = reader
         self.controller = controller
-        self.controller.execute_task("ao0", 1, 0)
+        self.input = INPUT
+        self.output = OUTPUT
+        self.controller.execute_task(self.output, 1, 0)
         self.WAVETYPE = WAVETYPE
         time.sleep(1)
         self.SETPOINT = SETPOINT
@@ -163,7 +165,7 @@ class ControllerThread(threading.Thread):
         self.type = "PID"
         self.user = user
         self.abort = False
-        self.flip = 1
+        self.flip = -1
 
     def run(self):
         try:
@@ -176,7 +178,7 @@ class ControllerThread(threading.Thread):
 
             for i in range(1, int(END)):
                 tic = datetime.now()
-                feedback = self.reader.read_all()["ai0"][0] * self.flip
+                feedback = self.reader.read_all()[self.input][0] * self.flip
                 if feedback < 0:
                     feedback = 0
                 # print "Feedback: ", feedback
@@ -188,7 +190,7 @@ class ControllerThread(threading.Thread):
                 elif u < 0:
                     u = 0
 
-                self.controller.execute_task("ao0", 1, u)
+                self.controller.execute_task(self.output, 1, u)
 
                 if i > 9:
                     try:
@@ -224,6 +226,7 @@ class ControllerThread(threading.Thread):
             self.failed["status"] = True
             self.failed["reason"] = msg
 
+        self.controller.execute_task(self.output, 1, 0)
 
 """if __name__ == "__main__":
     SAMPLES = 10
