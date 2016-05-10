@@ -1,7 +1,7 @@
 # coding: utf-8
 import argparse
 from datetime import datetime
-from daqmxinterface import SFC
+import SFC
 
 __author__ = 'Joaquim Leitão'
 
@@ -112,7 +112,7 @@ class BoardInteraction(object):
         output = {}
         if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
             "status"]:
-            self.controller_thread = SFC.ControllerThread()
+            self.controller_thread = SFC.ControllerThread(user)
 
             output["completed"] = self.controller_thread.completed
             output["controller"] = self.controller_thread.type
@@ -184,7 +184,20 @@ class BoardInteraction(object):
                 output["message"] = "The controller is running."
                 output["status"] = 200
 
-            return dict(output.items() + self.controller_thread.output())
+            if self.controller_thread.type.lower() == "pid":
+                output.update(
+                    {"input": self.controller_thread.feedback_list, "output": self.controller_thread.output_list,
+                     "time_list": self.controller_thread.time_list,
+                     "setpoint_list": self.controller_thread.setpoint_list, "ts": self.controller_thread.TS,
+                     "setpoint": self.controller_thread.SETPOINT,
+                     "samples": self.controller_thread.SAMPLES, "P": self.controller_thread.P,
+                     "I": self.controller_thread.I, "D": self.controller_thread.D,
+                     "WAVETYPE": self.controller_thread.WAVETYPE,
+                     "input_device": self.controller_thread.input, "output_device": self.controller_thread.output})
+            elif self.controller_thread.type.lower()=="sfc":
+                pass
+
+            return output
         except Exception:
             traceback.print_exc()
 

@@ -8,8 +8,9 @@ class SFC:
 
 
 class ControllerThread(threading.Thread):
-    def __init__(self):
+    def __init__(self, user):
         threading.Thread.__init__(self)
+        self.user = user
         self.feedback_list = []
         self.setpoint_list = []
         self.output_list = []

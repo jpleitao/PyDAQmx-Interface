@@ -169,10 +169,7 @@ class ControllerThread(threading.Thread):
         self.flip = -1
 
     def output(self):
-        return {"input": self.feedback_list, "output": self.output_list, "time_list": self.time_list,
-                  "setpoint_list": self.setpoint_list, "ts": self.TS, "setpoint": self.SETPOINT,
-                  "samples": self.SAMPLES, "P": self.P, "I": self.I, "D": self.D, "WAVETYPE": self.WAVETYPE,
-                  "input_device": self.input, "output_device": self.output}
+        return
 
     def run(self):
         try:
