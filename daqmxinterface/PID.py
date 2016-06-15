@@ -168,9 +168,6 @@ class ControllerThread(threading.Thread):
         self.abort = False
         self.flip = -1
 
-    def output(self):
-        return
-
     def run(self):
         try:
             pid = PID(self.P, self.I, self.D)
@@ -208,11 +205,13 @@ class ControllerThread(threading.Thread):
                 if remaining < 0:
                     self.failed["status"] = True
                     self.failed["reason"] = "Sampling frequency is too big."
+                    self.controller.execute_task(self.output, 1, 0)
                     exit(1)
 
                 if self.abort:
                     self.failed["status"] = True
                     self.failed["reason"] = "Aborted by user."
+                    self.controller.execute_task(self.output, 1, 0)
                     exit(1)
                 time.sleep(remaining)
 

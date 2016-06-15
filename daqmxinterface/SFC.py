@@ -8,7 +8,7 @@ class SFC:
 
 
 class ControllerThread(threading.Thread):
-    def __init__(self, user):
+    def __init__(self, user, K, U, SAMPLES = 100, TS = 0.05, FLIP = True):
         threading.Thread.__init__(self)
         self.user = user
         self.feedback_list = []
@@ -21,7 +21,13 @@ class ControllerThread(threading.Thread):
         self.failed = {"status": False, "reason": ""}
         self.type = "SFC"
         self.abort = False
-        self.flip = -1
+        self.flip = 1
+        if FLIP:
+            self.flip = -1
+        self.SAMPLES = SAMPLES
+        self.TS = TS
+        self.K = K,
+        self.U = U
 
     def run(self):
         try:

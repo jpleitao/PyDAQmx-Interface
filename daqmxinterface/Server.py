@@ -108,12 +108,12 @@ class BoardInteraction(object):
         print 'Executing task ' + str(name), message
         return self.actuator.execute_task(name, num_samps_channel, message, auto_start, timeout)
 
-    def SFC_controller_input(self, user):
+    def SFC_controller_input(self, user, K, U, TS=0.05, SAMPLES=100):
         output = {}
         if self.controller_thread is None or self.controller_thread.isAlive() == False or self.controller_thread.failed[
             "status"]:
-            self.controller_thread = SFC.ControllerThread(user)
-
+            self.controller_thread = SFC.ControllerThread(user, K, U, TS=TS, SAMPLES=SAMPLES)
+            self.controller_thread.start()
             output["completed"] = self.controller_thread.completed
             output["controller"] = self.controller_thread.type
             output["success"] = True
@@ -194,8 +194,9 @@ class BoardInteraction(object):
                      "I": self.controller_thread.I, "D": self.controller_thread.D,
                      "WAVETYPE": self.controller_thread.WAVETYPE,
                      "input_device": self.controller_thread.input, "output_device": self.controller_thread.output})
-            elif self.controller_thread.type.lower()=="sfc":
-                pass
+            elif self.controller_thread.type.lower() == "sfc":
+                output.update({"K": self.controller_thread.K, "U": self.controller_thread.U,
+                               "samples": self.controller_thread.SAMPLES, "ts": self.controller_thread.TS})
 
             return output
         except Exception:
@@ -222,8 +223,8 @@ if __name__ == '__main__':
 
     print "Going to create thread"
 
-    # thread = threading.Thread(target=check_board, args=(board_interaction,))
-    # thread.start()
+    #thread = threading.Thread(target=check_board, args=(board_interaction,))
+    #thread.start()
 
     # Print the uri so we can use it in the client later
     print "Ready. Object uri =", uri
