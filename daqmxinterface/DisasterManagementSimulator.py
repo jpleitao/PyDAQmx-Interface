@@ -1,5 +1,4 @@
 # coding: utf-8
-__author__ = 'Joaquim Leitão'
 
 # Imports to be used in the code
 import timeit
@@ -7,8 +6,11 @@ import time
 import numpy
 import daqmxlib
 
-actuator = daqmxlib.Actuator(["ao0", "ao1"])
-reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1})
+__author__ = 'Joaquim Leitão'
+
+
+actuator = daqmxlib.Actuator(["ao0", "ao1"], 'dev1')
+reader = daqmxlib.Reader({"ai0": 1, "ai1": 1, "ai2": 1}, 'dev1')
 
 # Time Series Data
 duration = 1800  # Seconds
@@ -23,7 +25,7 @@ levels_tank2 = numpy.array([0.3, 0.3, 0.5, 0.5, 0.3, 0.3, 0.5, 0.5, 0.3, 0.3])
 print(times)
 
 current_position = 0
-number_events = len(times)
+number_events = times.size  # number_events = len(times)
 
 start_time = timeit.default_timer()
 

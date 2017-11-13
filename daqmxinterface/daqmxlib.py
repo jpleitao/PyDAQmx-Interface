@@ -29,7 +29,7 @@ class Actuator():
     Actuator class, responsible for actuating in a given channel of the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, physical_channels=["ao0"], device = "dev2"):
+    def __init__(self, physical_channels=["ao0"], device="dev2"):
         """
         Class Constructor
         :param physical_channels: A list of physical channels used to acquire the data
@@ -55,7 +55,7 @@ class Actuator():
             task = PyDAQmx.Task()
             tasks.append(task)
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAOVoltageChan(self.device +'/'+ str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
+            task.CreateAOVoltageChan(self.device + '/' + str(channel), "", DAQMX_MIN_ACTUATION_V, DAQMX_MAX_ACTUATION_V,
                                      VAL_VOLTS, None)  # Create Voltage Channel
         # Save all the tasks
         self.tasks = dict([(self.physical_channels[i], tasks[i]) for i in range(len(tasks))])
@@ -112,8 +112,9 @@ class Actuator():
         # TODO: CHANGE "name" TO BE A LIST: FUNCTION SHOULD ALSO CHANGE NAME
 
         if not (isinstance(message, int) or isinstance(message, float)):
-            raise TypeError("Wrong message type for the task to be executed in channel " + str(name) + ". Message should "
-                            "be an interger or float between 0 and 5") 
+            raise TypeError(
+                "Wrong message type for the task to be executed in channel " + str(name) + ". Message should "
+                                                                                           "be an interger or float between 0 and 5")
         message = float(message)
 
         # Message has to be a numpy array, so lets convert it to the desired data type
@@ -141,7 +142,7 @@ class Reader():
     Reader class, responsible for collecting data from the NI-USB Data Acquisition Hardware
     """
 
-    def __init__(self, channels_samples={"ai1": 1}, device = "dev2"):
+    def __init__(self, channels_samples={"ai1": 1}, device="dev2"):
         """
         Class Constructor
         :param channels_samples: A dictionary with a mapping between the physical channels used to acquire the data and
@@ -169,7 +170,8 @@ class Reader():
             # Create the tasks, one to read in each channel
             task = PyDAQmx.Task()
             # Create Voltage Channel to read from the given physical channel
-            task.CreateAIVoltageChan(self.device +'/' + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V, VAL_VOLTS,
+            task.CreateAIVoltageChan(self.device + '/' + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V,
+                                     DAQMX_MAX_READER_V, VAL_VOLTS,
                                      None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -201,8 +203,9 @@ class Reader():
 
         for current_samples in values:
             if not isinstance(current_samples, int):
-                raise TypeError("Invalid argument for the 'channels_samples' parameter. Expected dictionary with keys of type "
-                                "<class 'str'> and values type <class 'int'>")
+                raise TypeError(
+                    "Invalid argument for the 'channels_samples' parameter. Expected dictionary with keys of type "
+                    "<class 'str'> and values type <class 'int'>")
 
         return keys
 
@@ -227,7 +230,8 @@ class Reader():
         elif channel in self.physical_channels:
             # Create a new task for the given channel that is going to
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan(self.device +'/'+ str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan(self.device + '/' + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V,
+                                     DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0
@@ -267,7 +271,8 @@ class Reader():
             self.n_samples.append(current_samples)
             # Create a task and the voltage channel and store it
             task = PyDAQmx.Task()
-            task.CreateAIVoltageChan(self.device +'/'+ str(channel), "", VAL_RSE, DAQMX_MIN_READER_V, DAQMX_MAX_READER_V,
+            task.CreateAIVoltageChan(self.device + '/' + str(channel), "", VAL_RSE, DAQMX_MIN_READER_V,
+                                     DAQMX_MAX_READER_V,
                                      VAL_VOLTS, None)
             # Set the source of the sample clock - Acquire infinite number of samples and enabling to read the maximum
             # number of samples per second: 10000.0

@@ -203,7 +203,11 @@ class BoardInteraction(object):
             traceback.print_exc()
 
     def read_all(self, timeout=0.01, num_samples=None):
-        return self.reader.read_all(timeout, num_samples)
+        try:
+            return self.reader.read_all(timeout, num_samples)
+        except Exception, msg:
+            print msg
+            return None
 
     def change_collected_samples(self, physical_channel, number_samples):
         return self.reader.change_collected_samples(physical_channel, number_samples)
@@ -223,8 +227,8 @@ if __name__ == '__main__':
 
     print "Going to create thread"
 
-    #thread = threading.Thread(target=check_board, args=(board_interaction,))
-    #thread.start()
+    # thread = threading.Thread(target=check_board, args=(board_interaction,))
+    # thread.start()
 
     # Print the uri so we can use it in the client later
     print "Ready. Object uri =", uri

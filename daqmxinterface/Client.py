@@ -10,15 +10,17 @@ import time
 
 # Pyro4 Specific data
 port = 6000
-name = "NIBoard"
+name = "NIBoard_dev1"
 uri = "PYRO:/" + name + "@localhost:" + str(port)
 
 # Get a Pyro4 proxy to the greeting object
 # board_interaction = Pyro4.Proxy(uri)
-board_interaction = Pyro4.Proxy("PYRO:NIBoard_dev1@localhost:6001")
+board_interaction = Pyro4.Proxy("PYRO:NIBoard_dev2@localhost:6001")
 
 board_interaction.execute_task("ao0", 1, 0)
-board_interaction.execute_task("ao1", 1, 1.75)
+board_interaction.execute_task("ao1", 1, 0)
+print board_interaction.read_all()
+
 
 """
 # Generate the actuation signal
